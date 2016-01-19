@@ -42,6 +42,25 @@ commentSchema.statics.createNewComment = (req, cb) => {
 
 };
 
+commentSchema.statics.editComment = (req, cb) => {
+
+  var commentUpdate = req.body
+    , updateId     = req.params.commentId
+    , userId        = req.userId;
+
+  var errMsg = "error updating comment";
+  Comment.findById(updateId, (err, foundComment) => {
+    if (err || !foundComment) return cb(err || errMsg);
+    if (foundComment.user != userId) return cb(errMsg);
+    foundComment.body = req.body.body;
+    foundComment.editTime = Date.now();
+    foundComment.save( err => {
+      if (err) return cb(err);
+      return cb(null, foundComment);
+    })
+  })
+};
+
 commentSchema.statics.treeify = (comments) => {
 
   let childrenDictionary = comments.reduce((childrenDictionary, comment) => {
@@ -53,7 +72,7 @@ commentSchema.statics.treeify = (comments) => {
       childrenDictionary[parent] = [comment];
     }
     return childrenDictionary;
-  }, {})
+  }, {});
 
   function populatePost(post) {
     if (!childrenDictionary[post]) return [];
