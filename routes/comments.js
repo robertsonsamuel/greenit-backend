@@ -12,7 +12,7 @@ router.get('/', (req, res) => {
   });
 });
 
-router.post('/:parent/:isSeed?', authMiddleWare, (req, res) => {
+router.post('/:root/:parent?', authMiddleWare, (req, res) => {
   Comment.createNewComment(req.body, req.params, req.userId, (err, comment) => {
     res.status( err ? 400 : 200).send(err || comment)
   });
