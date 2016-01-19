@@ -24,9 +24,33 @@ commentSchema.statics.createNewComment = (newComment, params, userId, cb) => {
   });
 };
 
+commentSchema.statics.treeify = (comments) => {
+
+    let childrenDictionary = comments.reduce((childrenDictionary, comment) => {
+      comment = comment.toObject();
+      let parent = comment.parent || 'root';
+      if (childrenDictionary[parent]) {
+        childrenDictionary[parent].push(comment);
+      } else {
+        childrenDictionary[parent] = [comment];
+      }
+      return childrenDictionary;
+    }, {})
+
+    function populatePost(post) {
+      if (!childrenDictionary[post]) return [];
+      return childrenDictionary[post].map(child => {
+        child.children = populatePost(child._id);
+        return child;
+      })
+    }
+
+    return populatePost('root');
+};
+
 
 // VALIDATORS
-var errMsg = "Error posting commment";
+let errMsg = "Error posting commment";
 commentSchema.path('user').validate(function (value, respond) {
   User.findById({_id: value}, function (err, foundUser) {
     if (err || !foundUser) {

@@ -6,9 +6,9 @@ const express = require('express')
 
 let router = express.Router();
 
-router.get('/', (req, res) => {
-  Comment.find({}, (err, comments) => {
-    res.status( err ? 400 : 200).send(err || comments)
+router.get('/:root', (req, res) => {
+  Comment.find({'root' : req.params.root }, (err, comments) => {
+    res.status( err ? 400 : 200).send(err || Comment.treeify(comments))
   });
 });
 
