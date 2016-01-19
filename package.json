@@ -4,8 +4,8 @@
   "description": "*By Nicholas, Paul, and Sam*",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "setup": "rm -rf node_modules && npm i"
   },
   "repository": {
     "type": "git",
