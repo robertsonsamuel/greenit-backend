@@ -2,7 +2,7 @@
 
 const express = require('express')
     , Comment   = require('../models/comment')
-    , authMiddleWare = require('../util/authMiddleWare');
+    , authmiddleware = require('../util/authmiddleware');
 
 let router = express.Router();
 
@@ -12,7 +12,7 @@ router.get('/', (req, res) => {
   });
 });
 
-router.post('/:root/:parent?', authMiddleWare, (req, res) => {
+router.post('/:root/:parent?', authmiddleware, (req, res) => {
   Comment.createNewComment(req.body, req.params, req.userId, (err, comment) => {
     res.status( err ? 400 : 200).send(err || comment)
   });

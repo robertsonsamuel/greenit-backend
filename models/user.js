@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
     , jwt      = require('jwt-simple')
     , bcrypt   = require('bcryptjs')
     , moment   = require('moment')
-    , CONFIG   = require('../util/authConfig');
+    , CONFIG   = require('../util/authconfig');
 
 let User;
 
