@@ -7,7 +7,7 @@ const express = require('express')
 let router = express.Router();
 
 router.get('/', (req, res) => {
-  Topic.find({}, (err, topics) => {
+  Topic.find({}).populate('user').exec((err, topics) => {
     res.status( err ? 400 : 200).send(err || topics)
   });
 });
