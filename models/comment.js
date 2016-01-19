@@ -11,7 +11,7 @@ let commentSchema = mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId , ref: 'User', required: true },
   root: { type: mongoose.Schema.Types.ObjectId , ref: 'Topic', required: true },
   parent: { type: mongoose.Schema.Types.ObjectId , ref: 'Comment' },
-  timestamp: { type : Date, default: Date.now, required: true },
+  timestamp: { type : Date, default: Date.now},
   editTime: { type : Date, default: null }
 });
 
