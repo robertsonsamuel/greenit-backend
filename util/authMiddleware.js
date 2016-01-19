@@ -7,16 +7,11 @@ const jwt    = require('jwt-simple')
 
 module.exports = function(req, res, next) {
 
-              console.log("in Auth Route");
-              req.cookies.token = "delete me later";
-              next();
-
-
-  console.log(" GOT A COOKIE ", req.cookies.token, req.cookies);
-  var token = req.cookies.token;
-  if (!token) {
+  if (!req.headers.authorization) {
     return res.status(401).send('authorization required');
   }
+
+  let token = req.headers.authorization.replace('Bearer ', '');
 
   try {
     var decoded = jwt.decode(token, process.env.JWT_SECRET);
@@ -33,7 +28,7 @@ module.exports = function(req, res, next) {
       if (err) return res.status(400).send('server error');
       if (!user) return res.status(401).send('authorization required');
       req.userId = decoded.id;
-      res.cookie('token', user.token())
+      res.body(token);
       next();
     });
   } else {

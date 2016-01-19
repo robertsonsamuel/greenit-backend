@@ -26,6 +26,7 @@ app.use(cookieParser())
 // ROUTES
 app.use('/users', require('./routes/users'));
 app.use('/topics', require('./routes/topics'));
+app.use('/comments', require('./routes/comments'));
 
 // 404 HANDLER
 app.use(function(req, res){
