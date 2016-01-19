@@ -2,7 +2,7 @@
 
 const express = require('express')
     , Topic   = require('../models/topic')
-    , authmiddleware = require('../util/authmiddleware');
+    , authMiddleware = require('../util/auth-middleware');
 
 let router = express.Router();
 
@@ -12,7 +12,7 @@ router.get('/', (req, res) => {
   });
 });
 
-router.post('/', authmiddleware, (req, res) => {
+router.post('/', authMiddleware, (req, res) => {
   Topic.createNewTopic(req.body, req.userId, (err, topic) => {
     res.status( err ? 400 : 200).send(err || topic);
   });

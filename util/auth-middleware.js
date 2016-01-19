@@ -2,7 +2,7 @@
 
 const jwt    = require('jwt-simple')
     , moment = require('moment')
-    , CONFIG = require('./authconfig')
+    , CONFIG = require('./auth-config')
     , User   = require('../models/user');
 
 module.exports = function(req, res, next) {
