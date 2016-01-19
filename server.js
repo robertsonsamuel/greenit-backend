@@ -1,13 +1,13 @@
 'use strict';
 
-const PORT = process.env.PORT || 3000
-    , express = require('express')
-    , bodyParser = require('body-parser')
-    , morgan = require('morgan')
+const PORT         = process.env.PORT || 3000
+    , express      = require('express')
+    , bodyParser   = require('body-parser')
+    , morgan       = require('morgan')
     , cookieParser = require('cookie-parser')
-    , cors = require('cors')
-    , mongoose = require('mongoose')
-    , mongoUrl = process.env.MONGOLAB_URI || 'mongodb://localhost/greenit';
+    , cors         = require('cors')
+    , mongoose     = require('mongoose')
+    , mongoUrl     = process.env.MONGOLAB_URI || 'mongodb://localhost/greenit';
 
 
 mongoose.connect(mongoUrl)
@@ -26,6 +26,7 @@ app.use(express.static('public'));
 
 // ROUTES
 app.use('/users', require('./routes/users'));
+app.use('/topics', require('./routes/topics'));
 
 // 404 HANDLER
 app.use(function(req, res){
