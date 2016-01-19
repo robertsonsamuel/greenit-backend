@@ -50,10 +50,31 @@ commentSchema.statics.editComment = (req, cb) => {
 
   var errMsg = "error updating comment";
   Comment.findById(updateId, (err, foundComment) => {
+    if (foundComment.timestamp === null) return cb("Comment has been deleted");
     if (err || !foundComment) return cb(err || errMsg);
     if (foundComment.user != userId) return cb(errMsg);
     foundComment.body = req.body.body;
     foundComment.editTime = Date.now();
+    foundComment.save( err => {
+      if (err) return cb(err);
+      return cb(null, foundComment);
+    })
+  })
+};
+
+commentSchema.statics.deleteComment = (req, cb) => {
+
+  var updateId = req.params.commentId
+    , userId   = req.userId;
+
+  var errMsg = "error deleteing comment";
+  Comment.findById(updateId, (err, foundComment) => {
+    if (err || !foundComment) return cb(err || errMsg);
+    if (foundComment.user != userId) return cb(errMsg);
+    if (foundComment.timestamp === null) return cb("Comment already deleted")
+    foundComment.body = '[deleted]';
+    foundComment.editTime = null;
+    foundComment.timestamp = null;
     foundComment.save( err => {
       if (err) return cb(err);
       return cb(null, foundComment);

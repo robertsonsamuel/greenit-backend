@@ -25,4 +25,10 @@ router.put('/:commentId', authMiddleware, (req, res) => {
   })
 });
 
+router.delete('/:commentId', authMiddleware, (req, res) => {
+  Comment.deleteComment(req, (err, success) => {
+    res.status( err ? 400 : 200).send(err || success);
+  })
+});
+
 module.exports = router;
