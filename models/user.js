@@ -10,7 +10,7 @@ let User;
 
 let userSchema = mongoose.Schema({
   username: {type: String, required: true, unique: true},
-  password: {type: String, required: true}
+  password: {type: String, required: true, select: false}
 });
 
 userSchema.methods.token = function() {
@@ -25,7 +25,7 @@ userSchema.methods.token = function() {
 
 userSchema.statics.login = function(userInfo, cb) {
   // look for user in database
-  User.findOne({username: userInfo.username}, (err, foundUser) => {
+  User.findOne({username: userInfo.username}).select('+password').exec((err, foundUser) => {
     if (err) return cb('server error');
     if (!foundUser) return cb('incorrect username or password');
     bcrypt.compare(userInfo.password, foundUser.password, (err, isGood) => {

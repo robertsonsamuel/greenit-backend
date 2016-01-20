@@ -14,7 +14,7 @@ let topicSchema = mongoose.Schema({
 });
 
 topicSchema.statics.createNewTopic = (newTopic, userId, cb) => {
-  if (newTopic.user !== userId) return cb("authorization error");
+  newTopic.user = userId;
   Topic.create(newTopic, (err, savedTopic) => {
     return err ? cb(err) : cb(null, savedTopic);
   });

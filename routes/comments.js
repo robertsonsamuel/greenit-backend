@@ -6,16 +6,29 @@ const express = require('express')
 
 let router = express.Router();
 
-router.get('/', (req, res) => {
-  Comment.find({}, (err, comments) => {
-    res.status( err ? 400 : 200).send(err || comments)
+router.get('/:root', (req, res) => {
+  Comment.find({'root' : req.params.root })
+  .populate('user').exec((err, comments) => {
+    res.status( err ? 400 : 200).send(err || Comment.treeify(comments));
   });
 });
 
-router.post('/:root/:parent?', authMiddleware, (req, res) => {
-  Comment.createNewComment(req.body, req.params, req.userId, (err, comment) => {
-    res.status( err ? 400 : 200).send(err || comment)
+router.post('/:parent', authMiddleware, (req, res) => {
+  Comment.createNewComment(req, (err, newComment) => {
+    res.status( err ? 400 : 200).send(err || newComment);
   });
+});
+
+router.put('/:commentId', authMiddleware, (req, res) => {
+  Comment.editComment(req, (err, editedComment) => {
+    res.status( err ? 400 : 200).send(err || editedComment);
+  })
+});
+
+router.delete('/:commentId', authMiddleware, (req, res) => {
+  Comment.deleteComment(req, (err, success) => {
+    res.status( err ? 400 : 200).send(err || success);
+  })
 });
 
 module.exports = router;
