@@ -7,7 +7,9 @@ const express = require('express')
 let router = express.Router();
 
 router.get('/', (req, res) => {
-  Topic.find({}).populate('user').exec((err, topics) => {
+  Topic.find({})
+  .sort({'timestamp': -1})
+  .populate('user').exec((err, topics) => {
     res.status( err ? 400 : 200).send(err || topics)
   });
 });
