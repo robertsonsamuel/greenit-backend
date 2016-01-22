@@ -4,13 +4,15 @@ const mongoose = require('mongoose')
     , jwt      = require('jwt-simple')
     , bcrypt   = require('bcryptjs')
     , moment   = require('moment')
+    , Topic     = require('./topic')
     , CONFIG   = require('../util/auth-config');
 
 let User;
 
 let userSchema = mongoose.Schema({
   username: {type: String, required: true, unique: true},
-  password: {type: String, required: true, select: false}
+  password: {type: String, required: true, select: false},
+  greenTopics: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Topic' }] , select: false }
 });
 
 userSchema.methods.token = function() {
@@ -22,6 +24,29 @@ userSchema.methods.token = function() {
   };
   return jwt.encode(payload, process.env.JWT_SECRET);
 };
+
+userSchema.statics.greenit = function(req) {
+  //extract id from req header
+  if (!req.headers.authorization) return;
+  let token = req.headers.authorization.replace('Bearer ', '');
+  try {
+    var decoded = jwt.decode(token, process.env.JWT_SECRET);
+  } catch (e) {
+    return;
+  }
+  if (decoded.exp < moment().unix()) return;
+
+  // find user and add topic to green list
+  User.findById(decoded.id, (err, user) => {
+    if (err || !user) return;
+    if (user.greenTopics.some( id => req.params.root == id)) return;
+    user.greenTopics.push(req.params.root);
+    user.save((err) => {
+      console.log("error greening topic", user._id, req.params.root);
+    });
+  })
+
+}
 
 userSchema.statics.login = function(userInfo, cb) {
   // look for user in database
@@ -87,6 +112,17 @@ userSchema.statics.register = function(userInfo, cb) {
   });
 };
 
+// VALIDATORS
+userSchema.path('greenTopics').validate(function (value, respond) {
+  if (value.length === 0) return respond(true);
+  Topic.findById({_id: value.slice(-1)}, function (err, foundTopic) {
+    if (err || !foundTopic) {
+      respond(false);
+    } else {
+      respond(true);
+    }
+  });
+}, 'Error validating Topic');
 
 User = mongoose.model('User', userSchema);
 module.exports = User;

@@ -2,6 +2,7 @@
 
 const express = require('express')
     , Comment   = require('../models/comment')
+    , User   = require('../models/user')
     , authMiddleware = require('../util/auth-middleware');
 
 let router = express.Router();
@@ -10,6 +11,7 @@ router.get('/:root', (req, res) => {
   Comment.find({'root' : req.params.root })
   .sort({'timestamp': -1})
   .populate('user').exec((err, comments) => {
+    User.greenit(req);
     res.status( err ? 400 : 200).send(err || Comment.treeify(comments));
   });
 });
