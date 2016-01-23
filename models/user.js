@@ -4,7 +4,6 @@ const mongoose = require('mongoose')
     , jwt      = require('jwt-simple')
     , bcrypt   = require('bcryptjs')
     , moment   = require('moment')
-    , Topic     = require('./topic')
     , CONFIG   = require('../util/auth-config');
 
 let User;
@@ -111,18 +110,6 @@ userSchema.statics.register = function(userInfo, cb) {
     });
   });
 };
-
-// VALIDATORS
-userSchema.path('greenTopics').validate(function (value, respond) {
-  if (value.length === 0) return respond(true);
-  Topic.findById({_id: value.slice(-1)}, function (err, foundTopic) {
-    if (err || !foundTopic) {
-      respond(false);
-    } else {
-      respond(true);
-    }
-  });
-}, 'Error validating Topic');
 
 User = mongoose.model('User', userSchema);
 module.exports = User;
