@@ -11,7 +11,7 @@ let User;
 let userSchema = mongoose.Schema({
   username: {type: String, required: true, unique: true},
   password: {type: String, required: true, select: false},
-  greenTopics: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Topic' }] , select: false }
+  greenTopics: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Topic' }] , select: false, default: [] }
 });
 
 userSchema.methods.token = function() {
@@ -36,12 +36,13 @@ userSchema.statics.greenit = function(req) {
   if (decoded.exp < moment().unix()) return;
 
   // find user and add topic to green list
-  User.findById(decoded.id, (err, user) => {
+  User.findById(decoded.id).select('+greenTopics').exec((err, user) => {
     if (err || !user) return;
     if (user.greenTopics.some( id => req.params.root == id)) return;
     user.greenTopics.push(req.params.root);
     user.save((err) => {
       console.log("error greening topic", user._id, req.params.root);
+      return;
     });
   })
 
