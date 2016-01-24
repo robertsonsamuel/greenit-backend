@@ -18,6 +18,19 @@ router.post('/login', (req, res) => {
   });
 });
 
+router.post('/forgot', (req, res) => {
+  User.recovery(req, (err) =>{
+    res.status(err ? 400 : 200).send(err || 'Email sent successfully!')
+  })
+});
+
+router.post('/reset/:token', (req, res) =>{
+  console.log('reset!');
+  User.reset(req, (err) => {
+    res.status(err ? 400 : 200).send(err || 'Reset Successful!')
+  })
+})
+
 router.get('/:userId', authMiddleware, (req, res) => {
   if (req.params.userId !== req.userId) return res.status(403).send("unauthorized");
   User.findById(req.params.userId)
@@ -26,5 +39,7 @@ router.get('/:userId', authMiddleware, (req, res) => {
     res.status(err ? 400 : 200).send(err || user);
   })
 })
+
+
 
 module.exports = router;

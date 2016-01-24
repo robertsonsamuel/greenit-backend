@@ -18,12 +18,14 @@
   },
   "homepage": "https://github.com/paulgoblin/greenit-backend#readme",
   "dependencies": {
+    "async": "^1.5.2",
     "bcryptjs": "^2.3.0",
     "body-parser": "^1.14.2",
     "cookie-parser": "^1.4.1",
     "cors": "^2.7.1",
     "express": "^4.13.3",
     "jwt-simple": "^0.4.1",
+    "mailgun-js": "^0.7.7",
     "moment": "^2.11.1",
     "mongoose": "^4.3.6",
     "morgan": "^1.6.1"
