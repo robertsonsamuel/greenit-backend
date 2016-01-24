@@ -98,9 +98,12 @@ userSchema.statics.register = function(userInfo, cb) {
   }
 
   // create user model
-  User.findOne({username: username}, (err, user) => {
+  User.findOne($or[{username: username}, {email: email}], (err, user) => {
     if (err) return cb('error registering username');
-    if (user) return cb('username taken');
+    if (user) {
+      if (username === user.username) return cb('username taken');
+      if (email === user.email) return cb('email taken');
+    }
     bcrypt.genSalt(CONFIG.saltRounds, (err, salt) => {
       if (err) return cb(err);
       bcrypt.hash(password, salt, (err, hashedPassword) => {
@@ -207,7 +210,7 @@ userSchema.statics.reset = function(req, cb){
     }
   ], function(err, message) {
     console.log(err);
-    if(err) return cb(err)
+    if(err) return cb("Something wierd happened. Try your new password.")
     if(message) return cb(null, message)
   });
 
