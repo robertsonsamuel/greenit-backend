@@ -6,6 +6,7 @@ const PORT         = process.env.PORT || 3000
     , morgan       = require('morgan')
     , cookieParser = require('cookie-parser')
     , cors         = require('cors')
+    , compression  = require('compression')
     , path         = require('path')
     , mongoose     = require('mongoose')
     , mongoUrl     = process.env.MONGOLAB_URI || 'mongodb://localhost/greenit';
@@ -25,6 +26,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', require('./routes/index'));
 
 // GENERAL MIDDLEWARE
+app.use(compression());
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded( {extended: true} ));
 app.use(bodyParser.json());
