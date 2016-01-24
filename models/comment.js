@@ -13,8 +13,8 @@ let commentSchema = mongoose.Schema({
   parent: { type: mongoose.Schema.Types.ObjectId , ref: 'Comment' },
   timestamp: { type : Date, default: Date.now},
   editTime: { type : Date, default: null },
-  upvotes: { type: [{ type: mongoose.Schema.Types.ObjectId , ref: 'User' }] },
-  downvotes: { type: [{ type: mongoose.Schema.Types.ObjectId , ref: 'User' }] }
+  upvotes: { type: [{ type: mongoose.Schema.Types.ObjectId , ref: 'User' }], default: [] },
+  downvotes: { type: [{ type: mongoose.Schema.Types.ObjectId , ref: 'User' }], default: [] }
 });
 
 commentSchema.statics.createNewComment = (req, cb) => {
@@ -89,6 +89,7 @@ commentSchema.statics.treeify = (comments) => {
 
   let childrenDictionary = comments.reduce((childrenDictionary, comment) => {
     comment = comment.toObject();
+
     let parent = comment.parent || 'root';
     if (childrenDictionary[parent]) {
       childrenDictionary[parent].push(comment);
@@ -116,7 +117,7 @@ commentSchema.statics.vote = (req, cb) => {
     console.log("userId", req.userId);
     User.findById(req.userId, (err, foundUser) => {
       if (err || !foundUser) return cb(err || errMsg);
-      if (req.body.button === 'up') {
+      if (req.body.vote === 'up') {
         let voteIndex = comment.upvotes.indexOf(req.userId);
         (voteIndex === -1) ? comment.upvotes.push(req.userId)
                            : comment.upvotes.splice(voteIndex, 1);
@@ -127,7 +128,7 @@ commentSchema.statics.vote = (req, cb) => {
           if (err) return cb(err);
           return cb(null, "ok");
         })
-      } else if (req.body.button === 'down') {
+      } else if (req.body.vote === 'down') {
         let voteIndex = comment.downvotes.indexOf(req.userId);
         (voteIndex === -1) ? comment.downvotes.push(req.userId)
                            : comment.downvotes.splice(voteIndex, 1);
