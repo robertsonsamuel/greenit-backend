@@ -175,7 +175,9 @@ userSchema.statics.recovery = function(req, cb){
 userSchema.statics.reset = function(req, cb){
   async.waterfall([
     function(done) {
-      User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, function(err, user) {
+      User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } })
+      .select('+email')
+      .exec( (err, user) => {
         if (err || !user) console.log( "error finding user to reset!" ,err || "no user!");
         if (err || !user) return cb('Password reset token is invalid or has expired.', null);
         user.password = req.body.password;
