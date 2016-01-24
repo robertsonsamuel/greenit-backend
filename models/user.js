@@ -7,9 +7,9 @@ const mongoose = require('mongoose')
     , async    = require('async')
     , moment   = require('moment')
     , CONFIG   = require('../util/auth-config')
-    , api_key = 'key-883c7d9304ab524e05c00bacdd69af09' //replace me with process.env on deploy
-    , domain = 'sandbox7c6367aadb754ab785520abc9d2524bd.mailgun.org' // replace me with process.env on deploy
-    , mailgun = require('mailgun-js')({apiKey: api_key, domain: domain})
+    , api_key  = process.env.MAILGUN_KEY //replace me with process.env on deploy
+    , domain   = process.env.MAILGUN_DOMAIN // replace me with process.env on deploy
+    , mailgun  = require('mailgun-js')({apiKey: api_key, domain: domain})
 
 let User;
 
@@ -18,8 +18,8 @@ let userSchema = mongoose.Schema({
   password: {type: String, required: true, select: false},
   email: {type: String, unique: true},
   greenTopics: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Topic' }] , select: false, default: [] },
-  resetPasswordToken: {type: String },
-  resetPasswordExpires: {type: Date}
+  resetPasswordToken: {type: String, select: false },
+  resetPasswordExpires: {type: Date , select:false}
 });
 
 userSchema.methods.token = function() {
@@ -111,6 +111,8 @@ userSchema.statics.register = function(userInfo, cb) {
           password: hashedPassword
         });
         newUser.save((err, savedUser) => {
+          if(err || !savedUser) return cb(err);
+          console.log('saved user', savedUser);
           var token = savedUser.token()
           savedUser = savedUser.toObject();
           delete savedUser.password;
