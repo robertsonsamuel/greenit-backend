@@ -136,12 +136,13 @@ userSchema.statics.recovery = function(req, cb){
       function(token, done) {
         User.findOne({ email: req.body.email }, function(err, user) {
           if (!user) {
-            return  cb('error', 'No account with that email address exists.');
+            return  cb('No account with that email address exists.', null);
           }
           user.resetPasswordToken = token;
           user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
 
           user.save(function(err) {
+            if(err) console.log(err);
             done(err, token, user);
           });
         });
@@ -158,11 +159,13 @@ userSchema.statics.recovery = function(req, cb){
             'If you did not request this, please ignore this email and your password will remain unchanged.\n'
         };
         mailgun.messages().send(emailData, function (err, body) {
-          done(err, 'done');
+          done(err, 'Email Sent, check your inbox!');
         });
       }
-    ], function(err) {
+    ], function(err , message) {
+      if(err) console.log(err);
       if (err) return cb('There was an error requesting a password reset.');
+      if(message) return cb(null, message)
     });
 
 }
@@ -172,20 +175,20 @@ userSchema.statics.reset = function(req, cb){
     function(done) {
       User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, function(err, user) {
         if (!user) {
-          cb('error', 'Password reset token is invalid or has expired.');
+          cb('Password reset token is invalid or has expired.', null);
         }
         user.password = req.body.password;
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
 
         bcrypt.genSalt(CONFIG.saltRounds, (err, salt) => {
-          if (err) return cb(err);
+          if (err) return cb(err, null);
           bcrypt.hash(user.password, salt, (err, hashedPassword) => {
-            if (err) return cb(err);
+            if (err) return cb(err, null);
               user.password = hashedPassword;
 
             user.save( (err, savedUser) => {
-              if(err) return cb(err)
+              if(err) return cb(err, null)
                 done(err, user);
             });
           });
@@ -201,13 +204,14 @@ userSchema.statics.reset = function(req, cb){
           'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
       };
       mailgun.messages().send(emailData, function (err, body) {
-        done(err, 'Success! Your password has been changed.');
+        done(err, 'Success! Your email has been sent!');
       });
     }
   ], function(err) {
-    if(err) cb(err)
-    return;
+    if(err) return cb(err, null)
+
   });
+
 }
 
 User = mongoose.model('User', userSchema);
