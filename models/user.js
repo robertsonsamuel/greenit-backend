@@ -16,7 +16,7 @@ let User;
 let userSchema = mongoose.Schema({
   username: {type: String, required: true, unique: true},
   password: {type: String, required: true, select: false},
-  email: {type: String, unique: true},
+  email: {type: String, unique: true, select: false},
   greenTopics: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Topic' }] , select: false, default: [] },
   resetPasswordToken: {type: String, select: false },
   resetPasswordExpires: {type: Date , select:false}
