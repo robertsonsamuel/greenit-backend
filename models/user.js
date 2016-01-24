@@ -98,7 +98,7 @@ userSchema.statics.register = function(userInfo, cb) {
   }
 
   // create user model
-  User.findOne($or[{username: username}, {email: email}], (err, user) => {
+  User.findOne( {$or: [ {username: username}, {email: email} ]}, (err, user) => {
     if (err) return cb('error registering username');
     if (user) {
       if (username === user.username) return cb('username taken');
