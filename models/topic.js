@@ -20,7 +20,6 @@ topicSchema.statics.createNewTopic = (newTopic, userId, cb) => {
   });
 };
 
-
 // VALIDATORS
 topicSchema.path('user').validate(function (value, respond) {
   User.findById({_id: value}, function (err, foundUser) {
