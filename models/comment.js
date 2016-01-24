@@ -110,16 +110,18 @@ commentSchema.statics.treeify = (comments) => {
   return populatePost('root');
 };
 
-commentSchema.statics.vote = (req) => {
+commentSchema.statics.vote = (req, cb) => {
   Comment.findById(req.params.commentId, (err, comment) => {
     if (err || !comment) return cb(err || errMsg);
+    console.log("userId", req.userId);
     User.findById(req.userId, (err, foundUser) => {
-      if (err || !user) return cb(err || errMsg);
+      if (err || !foundUser) return cb(err || errMsg);
       if (req.params.button === 'up') {
         let voteIndex = comment.upvotes.indexOf(req.userId);
         (voteIndex === -1) ? comment.upvotes.push(req.userId)
-                           : comment.upvotes.slice(voteIndex, 1);
-        let filteredDownvotes = comment.downvotes.filter(user => user !== req.userId);
+                           : comment.upvotes.splice(voteIndex, 1);
+
+        let filteredDownvotes = comment.downvotes.filter(user => user != req.userId);
         comment.downvotes = filteredDownvotes;
         comment.save( err => {
           if (err) return cb(err);
@@ -128,15 +130,16 @@ commentSchema.statics.vote = (req) => {
       } else if (req.params.button === 'down') {
         let voteIndex = comment.downvotes.indexOf(req.userId);
         (voteIndex === -1) ? comment.downvotes.push(req.userId)
-                           : comment.downvotes.slice(voteIndex, 1);
-        let filteredUpvotes = comment.upvotes.filter(user => user !== req.userId);
+                           : comment.downvotes.splice(voteIndex, 1);
+        let filteredUpvotes = comment.upvotes.filter(user => user != req.userId);
         comment.upvotes = filteredUpvotes;
         comment.save( err => {
           if (err) return cb(err);
           return cb(null, "ok");
         })
+      } else {
+        return cb('incorrect vote direction');
       }
-      return cb('incorrect vote direction')
     })
   })
 };
