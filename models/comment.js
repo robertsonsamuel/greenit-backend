@@ -116,7 +116,7 @@ commentSchema.statics.vote = (req, cb) => {
     console.log("userId", req.userId);
     User.findById(req.userId, (err, foundUser) => {
       if (err || !foundUser) return cb(err || errMsg);
-      if (req.params.button === 'up') {
+      if (req.body.button === 'up') {
         let voteIndex = comment.upvotes.indexOf(req.userId);
         (voteIndex === -1) ? comment.upvotes.push(req.userId)
                            : comment.upvotes.splice(voteIndex, 1);
@@ -127,7 +127,7 @@ commentSchema.statics.vote = (req, cb) => {
           if (err) return cb(err);
           return cb(null, "ok");
         })
-      } else if (req.params.button === 'down') {
+      } else if (req.body.button === 'down') {
         let voteIndex = comment.downvotes.indexOf(req.userId);
         (voteIndex === -1) ? comment.downvotes.push(req.userId)
                            : comment.downvotes.splice(voteIndex, 1);
