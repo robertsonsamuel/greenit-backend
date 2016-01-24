@@ -34,4 +34,10 @@ router.delete('/:commentId', authMiddleware, (req, res) => {
   })
 });
 
+router.post('/vote/:commentId/:button', authMiddleware, (req, res) => {
+  Comment.vote(req, (err, success) => {
+    res.status( err ? 400 : 200).send(err || success);
+  })
+})
+
 module.exports = router;

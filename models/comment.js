@@ -12,7 +12,9 @@ let commentSchema = mongoose.Schema({
   root: { type: mongoose.Schema.Types.ObjectId , ref: 'Topic', required: true },
   parent: { type: mongoose.Schema.Types.ObjectId , ref: 'Comment' },
   timestamp: { type : Date, default: Date.now},
-  editTime: { type : Date, default: null }
+  editTime: { type : Date, default: null },
+  upvotes: { type: [{ type: mongoose.Schema.Types.ObjectId , ref: 'User' }] },
+  downvotes: { type: [{ type: mongoose.Schema.Types.ObjectId , ref: 'User' }] }
 });
 
 commentSchema.statics.createNewComment = (req, cb) => {
@@ -23,6 +25,7 @@ commentSchema.statics.createNewComment = (req, cb) => {
     , userId     = req.userId;
 
   newComment.user = req.userId;
+  newComment.upvotes = [req.userId];
 
   if (seed==="true") {
     newComment.root = params.parent;
@@ -107,9 +110,39 @@ commentSchema.statics.treeify = (comments) => {
   return populatePost('root');
 };
 
+commentSchema.statics.vote = (req) => {
+  Comment.findById(req.params.commentId, (err, comment) => {
+    if (err || !comment) return cb(err || errMsg);
+    User.findById(req.userId, (err, foundUser) => {
+      if (err || !user) return cb(err || errMsg);
+      if (req.params.button === 'up') {
+        let voteIndex = comment.upvotes.indexOf(req.userId);
+        (voteIndex === -1) ? comment.upvotes.push(req.userId)
+                           : comment.upvotes.slice(voteIndex, 1);
+        let filteredDownvotes = comment.downvotes.filter(user => user !== req.userId);
+        comment.downvotes = filteredDownvotes;
+        comment.save( err => {
+          if (err) return cb(err);
+          return cb(null, "ok");
+        })
+      } else if (req.params.button === 'down') {
+        let voteIndex = comment.downvotes.indexOf(req.userId);
+        (voteIndex === -1) ? comment.downvotes.push(req.userId)
+                           : comment.downvotes.slice(voteIndex, 1);
+        let filteredUpvotes = comment.upvotes.filter(user => user !== req.userId);
+        comment.upvotes = filteredUpvotes;
+        comment.save( err => {
+          if (err) return cb(err);
+          return cb(null, "ok");
+        })
+      }
+      return cb('incorrect vote direction')
+    })
+  })
+};
 
 // VALIDATORS
-let errMsg = "Error posting commment";
+let errMsg = "Error posting comment";
 commentSchema.path('user').validate(function (value, respond) {
   User.findById({_id: value}, function (err, foundUser) {
     if (err || !foundUser) {
