@@ -7,8 +7,8 @@ const mongoose = require('mongoose')
     , async    = require('async')
     , moment   = require('moment')
     , CONFIG   = require('../util/auth-config')
-    , api_key  = process.env.MAILGUN_KEY //replace me with process.env on deploy
-    , domain   = process.env.MAILGUN_DOMAIN // replace me with process.env on deploy
+    , api_key  = process.env.MAILGUN_KEY
+    , domain   = process.env.MAILGUN_DOMAIN
     , mailgun  = require('mailgun-js')({apiKey: api_key, domain: domain})
 
 let User;
@@ -112,7 +112,6 @@ userSchema.statics.register = function(userInfo, cb) {
         });
         newUser.save((err, savedUser) => {
           if(err || !savedUser) return cb(err);
-          console.log('saved user', savedUser);
           var token = savedUser.token()
           savedUser = savedUser.toObject();
           delete savedUser.password;
@@ -142,7 +141,7 @@ userSchema.statics.recovery = function(req, cb){
           user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
 
           user.save(function(err) {
-            if(err) console.log(err);
+            if(err) console.log('error saving',err);
             done(err, token, user);
           });
         });
@@ -158,6 +157,7 @@ userSchema.statics.recovery = function(req, cb){
             'If you did not request this, please ignore this email and your password will remain unchanged.\n'
         };
         mailgun.messages().send(emailData, function (err, body) {
+          console.log("mailgun Error", err);
           done(err, 'Email Sent, check your inbox!');
         });
       }
