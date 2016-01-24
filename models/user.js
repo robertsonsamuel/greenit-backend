@@ -154,8 +154,7 @@ userSchema.statics.recovery = function(req, cb){
           subject: 'Greenit Password Reset',
           text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
             'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-            //'http://' + req.headers.host + '/users/reset/' + token + '\n\n' +  // render a page?
-            'http://paulgoblin.github.io/greenit-frontend/' + 'reset/' + token + '\n\n' +
+            'http://' + req.headers.host + '/resetPassword/' + token + '\n\n' +
             'If you did not request this, please ignore this email and your password will remain unchanged.\n'
         };
         mailgun.messages().send(emailData, function (err, body) {
@@ -207,9 +206,10 @@ userSchema.statics.reset = function(req, cb){
         done(err, 'Success! Your email has been sent!');
       });
     }
-  ], function(err) {
-    if(err) return cb(err, null)
-
+  ], function(err, message) {
+    console.log(err);
+    if(err) return cb(err)
+    if(message) return cb(null, message)
   });
 
 }

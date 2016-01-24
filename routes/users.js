@@ -20,15 +20,13 @@ router.post('/login', (req, res) => {
 
 router.post('/forgot', (req, res) => {
   User.recovery(req, (err, message) => {
-    if(err) console.log(err);
-    if(message) console.log(message);
     res.status(err ? 400 : 200).send(err || message)
   })
 });
 
 router.post('/reset/:token', (req, res) => {
-  User.reset(req, (err) => {
-    res.status(err ? 400 : 200).send(err || 'Reset Successful!')
+  User.reset(req, (err, message) => {
+    res.status(err ? 400 : 200).send(err || message)
   })
 })
 
