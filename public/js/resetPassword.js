@@ -39,7 +39,10 @@ event.preventDefault();
     })
     .fail(function (err) {
       $("#alertWarning").show().text("Please try again and check your connection.");
-
+    })
+    .always(function () {
+      $("#password").val('');
+      $("#password2").val('');
     })
 
  }else{
