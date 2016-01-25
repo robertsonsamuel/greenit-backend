@@ -17,9 +17,14 @@ mongoose.connect(mongoUrl)
 var app = express();
 
 //cors
-app.use(cors({
-  origin: 'http://paulgoblin.github.io'
-}));
+var whitelist = ['http://paulgoblin.github.io', 'http://localhost:8000/'];
+var corsOptions = {
+  origin: function(origin, callback){
+    var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
+    callback(null, originIsWhitelisted);
+  }
+};
+app.use(cors(corsOptions));
 
 //VIEWS
 app.set('views', path.join(__dirname, 'views'));
