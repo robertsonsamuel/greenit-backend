@@ -113,6 +113,7 @@ userSchema.statics.register = function(userInfo, cb) {
           email: email,
           password: hashedPassword
         });
+        
         newUser.save((err, savedUser) => {
           if(err || !savedUser) return cb(err);
           var token = savedUser.token()
