@@ -2,8 +2,7 @@
 
 const mongoose = require('mongoose')
     , Topic    = require('./topic')
-    , User     = require('./user')
-    , marked = require('marked');
+    , User     = require('./user');
 
 let Comment;
 
@@ -16,18 +15,6 @@ let commentSchema = mongoose.Schema({
   editTime: { type : Date, default: null },
   upvotes: { type: [{ type: mongoose.Schema.Types.ObjectId , ref: 'User' }], default: [] },
   downvotes: { type: [{ type: mongoose.Schema.Types.ObjectId , ref: 'User' }], default: [] }
-});
-
-// MARKDOWN OPTIONS
-marked.setOptions({
-  renderer: new marked.Renderer(),
-  gfm: true,
-  tables: true,
-  breaks: false,
-  pedantic: false,
-  sanitize: true,
-  smartLists: true,
-  smartypants: false
 });
 
 commentSchema.statics.createNewComment = (req, cb) => {
@@ -98,26 +85,11 @@ commentSchema.statics.deleteComment = (req, cb) => {
   })
 };
 
-commentSchema.statics.markdownToHtml = (comments, cb) => {
-  let htmlComments = comments.map((comment) => {
-    comment = comment.toObject();
-    return new Promise((resolve, reject) => {
-      marked(comment.body, (err, html) => {
-        if (err) {
-          comment.body = comment.body.replace(/[<>]/g, ' ಠ_ಠ ');
-          return resolve(comment);
-        }
-        comment.body = html;
-        return resolve(comment);
-      });
-    });
-  });
-  Promise.all(htmlComments).then(cb);
-}
-
 commentSchema.statics.treeify = (comments) => {
 
   let childrenDictionary = comments.reduce((childrenDictionary, comment) => {
+    comment = comment.toObject();
+
     let parent = comment.parent || 'root';
     if (childrenDictionary[parent]) {
       childrenDictionary[parent].push(comment);
