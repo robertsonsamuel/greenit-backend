@@ -101,7 +101,13 @@ commentSchema.statics.treeify = (comments) => {
 
   function populatePost(post) {
     if (!childrenDictionary[post]) return [];
-    // can sort childrenDictionary[post] here
+
+    childrenDictionary[post].sort((commentA, commentB) => {
+      let commentAscore = commentA.upvotes.length - commentA.downvotes.length;
+      let commentBscore = commentB.upvotes.length - commentB.downvotes.length;
+      return commentBscore - commentAscore;
+    });
+
     return childrenDictionary[post].map(child => {
       child.children = populatePost(child._id);
       return child;
