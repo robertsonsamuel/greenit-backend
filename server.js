@@ -17,7 +17,9 @@ mongoose.connect(mongoUrl)
 var app = express();
 
 //cors
-app.use(cors());
+app.use(cors({
+  origin: 'http://paulgoblin.github.io/greenit-frontend'
+}));
 
 //VIEWS
 app.set('views', path.join(__dirname, 'views'));

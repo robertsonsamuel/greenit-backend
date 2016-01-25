@@ -1,3 +1,3 @@
 # Green it (backend)
 
-*By Nicholas, Paul, and Sam*
+By [Nicholas](https://github.com/babelthuap), [Paul](https://github.com/paulgoblin), and [Sam](https://github.com/robertsonsamuel)
