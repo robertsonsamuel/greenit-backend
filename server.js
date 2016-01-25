@@ -23,7 +23,7 @@ app.use(cors());
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use('/', require('./routes/index'));
 
 // GENERAL MIDDLEWARE
 app.use(compression());
@@ -33,7 +33,6 @@ app.use(bodyParser.json());
 app.use(cookieParser())
 
 // ROUTES
-app.use('/', require('./routes/index'));
 app.use('/users', require('./routes/users'));
 app.use('/topics', require('./routes/topics'));
 app.use('/comments', require('./routes/comments'));
