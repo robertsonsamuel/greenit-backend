@@ -16,7 +16,7 @@ let User;
 let userSchema = mongoose.Schema({
   username: {type: String, required: true, unique: true},
   password: {type: String, required: true, select: false},
-  email: {type: String, unique: true, select: false},
+  email: {type: String, select: false},
   greenTopics: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Topic' }] , select: false, default: [] },
   resetPasswordToken: {type: String, select: false },
   resetPasswordExpires: {type: Date , select:false}
@@ -115,7 +115,21 @@ userSchema.statics.register = function(userInfo, cb) {
         });
         newUser.save((err, savedUser) => {
           if(err || !savedUser) return cb(err);
-          var token = savedUser.token()
+          if(savedUser.email.length){
+            var emailData = {
+              from: 'welcome@greenit.com',
+              to: savedUser.email,
+              subject: 'Welcome To GreenIt!',
+              text: 'Hello there '+ savedUser.username + '! Congratulations on joining GreenIt!\n\n' +
+                'You are joining an awesome website of user driven content, anonymous and safe! Click the link below to get started! \n\n' +
+                'http://paulgoblin.github.io/greenit-frontend/'+ '\n\n'
+            };
+            mailgun.messages().send(emailData, function (err, body) {
+              console.log("mailgun Error", err);
+              cb(err);
+            });
+          }
+          var token = savedUser.token();
           savedUser = savedUser.toObject();
           delete savedUser.password;
           console.log("returning saved user", savedUser);
