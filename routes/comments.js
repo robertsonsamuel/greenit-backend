@@ -12,7 +12,9 @@ router.get('/:root', (req, res) => {
   .sort({'timestamp': -1})
   .populate('user').exec((err, comments) => {
     User.greenit(req);
-    res.status( err ? 400 : 200).send(err || Comment.treeify(comments));
+    Comment.markdownToHtml(comments, (htmlComments) => {
+      res.status( err ? 400 : 200).send(err || Comment.treeify(htmlComments));
+    });
   });
 });
 
