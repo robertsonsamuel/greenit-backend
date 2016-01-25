@@ -18,7 +18,7 @@ var app = express();
 
 //cors
 app.use(cors({
-  origin: 'http://paulgoblin.github.io/greenit-frontend'
+  origin: 'http://paulgoblin.github.io'
 }));
 
 //VIEWS
