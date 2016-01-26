@@ -1,7 +1,7 @@
 'use strict';
 
 const mongoose = require('mongoose')
-    , Topic    = require('./topic')
+    , Resource    = require('./resource')
     , User     = require('./user');
 
 let Comment;
@@ -9,7 +9,7 @@ let Comment;
 let commentSchema = mongoose.Schema({
   body: { type: String, required: true },
   user: { type: mongoose.Schema.Types.ObjectId , ref: 'User', required: true },
-  root: { type: mongoose.Schema.Types.ObjectId , ref: 'Topic', required: true },
+  root: { type: mongoose.Schema.Types.ObjectId , ref: 'Resource', required: true },
   parent: { type: mongoose.Schema.Types.ObjectId , ref: 'Comment' },
   timestamp: { type : Date, default: Date.now},
   editTime: { type : Date, default: null },
@@ -164,8 +164,8 @@ commentSchema.path('user').validate(function (value, respond) {
 }, 'Error validating user');
 
 commentSchema.path('root').validate(function (value, respond) {
-  Topic.findById({_id: value}, function (err, foundTopic) {
-    if (err || !foundTopic) {
+  Resource.findById({_id: value}, function (err, foundResource) {
+    if (err || !foundResource) {
       respond(false);
     } else {
       respond(true);

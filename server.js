@@ -9,7 +9,7 @@ const PORT         = process.env.PORT || 3000
     , compression  = require('compression')
     , path         = require('path')
     , mongoose     = require('mongoose')
-    , mongoUrl     = process.env.MONGOLAB_URI || 'mongodb://localhost/greenit';
+    , mongoUrl     = process.env.MONGOLAB_URI || 'mongodb://localhost/startcoding';
 
 
 mongoose.connect(mongoUrl)
@@ -41,7 +41,7 @@ app.use(cookieParser())
 
 // ROUTES
 app.use('/users', require('./routes/users'));
-app.use('/topics', require('./routes/topics'));
+app.use('/resources', require('./routes/resources'));
 app.use('/comments', require('./routes/comments'));
 
 // 404 HANDLER

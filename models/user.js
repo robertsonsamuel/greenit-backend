@@ -17,7 +17,7 @@ let userSchema = mongoose.Schema({
   username: {type: String, required: true, unique: true},
   password: {type: String, required: true, select: false},
   email: {type: String, unique: true, select: false},
-  greenTopics: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Topic' }] , select: false, default: [] },
+  greenResources: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Resource' }] , select: false, default: [] },
   resetPasswordToken: {type: String, select: false },
   resetPasswordExpires: {type: Date , select:false}
 });
@@ -43,13 +43,13 @@ userSchema.statics.greenit = function(req) {
   }
   if (decoded.exp < moment().unix()) return;
 
-  // find user and add topic to green list
-  User.findById(decoded.id).select('+greenTopics').exec((err, user) => {
+  // find user and add resource to green list
+  User.findById(decoded.id).select('+greenResources').exec((err, user) => {
     if (err || !user) return;
-    if (user.greenTopics.some( id => req.params.root == id)) return;
-    user.greenTopics.push(req.params.root);
+    if (user.greenResources.some( id => req.params.root == id)) return;
+    user.greenResources.push(req.params.root);
     user.save((err) => {
-      console.log("error greening topic", user._id, req.params.root);
+      console.log("error greening resource", user._id, req.params.root);
       return;
     });
   })
@@ -113,7 +113,7 @@ userSchema.statics.register = function(userInfo, cb) {
           email: email,
           password: hashedPassword
         });
-        
+
         newUser.save((err, savedUser) => {
           if(err || !savedUser) return cb(err);
           var token = savedUser.token()
