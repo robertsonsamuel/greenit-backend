@@ -99,9 +99,7 @@ userSchema.statics.register = function(userInfo, cb) {
 
   // create user model
   let newUserQuery = email ? { $or: [{email: email}, {username: username}] } : {username: username};
-  console.log("QUERY", newUserQuery);
   User.findOne(newUserQuery).select('+email').exec((err, user) => {
-    console.log("info",username,  user.username, email, user.email);
     if (err) return cb('error registering username');
     if (user) {
       if (username === user.username) return cb('username taken');
