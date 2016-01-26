@@ -16,7 +16,7 @@ let User;
 let userSchema = mongoose.Schema({
   username: {type: String, required: true, unique: true},
   password: {type: String, required: true, select: false},
-  email: {type: String, unique: true, select: false},
+  email: {type: String, select: false},
   greenResources: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Resource' }] , select: false, default: [] },
   resetPasswordToken: {type: String, select: false },
   resetPasswordExpires: {type: Date , select:false}
@@ -98,7 +98,10 @@ userSchema.statics.register = function(userInfo, cb) {
   }
 
   // create user model
-  User.findOne( {$or: [ {username: username}, {email: email} ]}, (err, user) => {
+  let newUserQuery = email ? { $or: [{email: email}, {username: username}] } : {username: username};
+  console.log("QUERY", newUserQuery);
+  User.findOne(newUserQuery).select('+email').exec((err, user) => {
+    console.log("info",username,  user.username, email, user.email);
     if (err) return cb('error registering username');
     if (user) {
       if (username === user.username) return cb('username taken');
@@ -113,9 +116,25 @@ userSchema.statics.register = function(userInfo, cb) {
           email: email,
           password: hashedPassword
         });
+        console.log("new USER", newUser);
 
         newUser.save((err, savedUser) => {
-          if(err || !savedUser) return cb(err);
+          if(err || !savedUser) return cb('Username or email already taken.');
+          if(savedUser.email.length){
+             var emailData = {
+               from: 'welcome@greenit.com',
+               to: savedUser.email,
+               subject: 'Welcome To GreenIt!',
+               text: 'Hello there '+ savedUser.username + '! Congratulations on joining GreenIt!\n\n' +
+                 'You are joining an awesome website of user driven content, anonymous and safe! Click the link below to get started! \n\n' +
+                 'http://paulgoblin.github.io/greenit-frontend/'+ '\n\n'
+             };
+             mailgun.messages().send(emailData, function (err, body) {
+               console.log("mailgun Error", err);
+              cb(err);
+            });
+           }
+
           var token = savedUser.token()
           savedUser = savedUser.toObject();
           delete savedUser.password;

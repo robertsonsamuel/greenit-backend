@@ -3,7 +3,6 @@
 const mongoose = require('mongoose')
     , User     = require('./user');
 
-
 let Resource;
 
 let resourceSchema = mongoose.Schema({

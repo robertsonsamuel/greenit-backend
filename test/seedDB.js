@@ -5,8 +5,8 @@ var exec = require('child_process').execSync;
 console.log('seeding database from ./users.json');
 exec('mongoimport --db greenit --collection users --drop --file ./users.json --jsonArray');
 
-console.log('seeding database from ./topics.json');
-exec('mongoimport --db greenit --collection topics --drop --file ./topics.json --jsonArray');
+console.log('seeding database from ./resourcess.json');
+exec('mongoimport --db greenit --collection resourcess --drop --file ./resourcess.json --jsonArray');
 
 console.log('seeding database from ./comments.json');
 exec('mongoimport --db greenit --collection comments --drop --file ./comments.json --jsonArray');
