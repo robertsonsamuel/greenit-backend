@@ -1,5 +1,5 @@
 {
-  "name": "greenit",
+  "name": "startcoding",
   "version": "1.0.0",
   "description": "*By Nicholas, Paul, and Sam*",
   "main": "server.js",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/paulgoblin/greenit-backend.git"
+    "url": "git+https://github.com/robertsonsamuel/startcoding-backend.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/paulgoblin/greenit-backend/issues"
+    "url": "https://github.com/robertsonsamuel/startcoding-backend/issues"
   },
-  "homepage": "https://github.com/paulgoblin/greenit-backend#readme",
+  "homepage": "https://github.com/robertsonsamuel/startcoding-backend#readme",
   "dependencies": {
     "async": "^1.5.2",
     "bcryptjs": "^2.3.0",

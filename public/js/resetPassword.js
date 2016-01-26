@@ -34,7 +34,7 @@ event.preventDefault();
     $.post(`/users/reset/${token}`, {password : password })
     .done(function (resp) {
        $("#alertSucess").show().text("Changed Successfully");
-       $("#alertSucess").append('<p><a href="http://paulgoblin.github.io/greenit-frontend/">Return to GreenIt!</a></p>')
+       $("#alertSucess").append('<p><a href="http://robertsonsamuel.github.io/startcoding-frontend/">Return to StartCoding.org!</a></p>')
        $("#saveButton").prop("disabled", true);
     })
     .fail(function (err) {

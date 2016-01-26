@@ -17,7 +17,6 @@ let userSchema = mongoose.Schema({
   username: {type: String, required: true, unique: true},
   password: {type: String, required: true, select: false},
   email: {type: String, select: false},
-  greenResources: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Resource' }] , select: false, default: [] },
   resetPasswordToken: {type: String, select: false },
   resetPasswordExpires: {type: Date , select:false}
 });
@@ -31,30 +30,6 @@ userSchema.methods.token = function() {
   };
   return jwt.encode(payload, process.env.JWT_SECRET);
 };
-
-userSchema.statics.greenit = function(req) {
-  //extract id from req header
-  if (!req.headers.authorization) return;
-  let token = req.headers.authorization.replace('Bearer ', '');
-  try {
-    var decoded = jwt.decode(token, process.env.JWT_SECRET);
-  } catch (e) {
-    return;
-  }
-  if (decoded.exp < moment().unix()) return;
-
-  // find user and add resource to green list
-  User.findById(decoded.id).select('+greenResources').exec((err, user) => {
-    if (err || !user) return;
-    if (user.greenResources.some( id => req.params.root == id)) return;
-    user.greenResources.push(req.params.root);
-    user.save((err) => {
-      console.log("error greening resource", user._id, req.params.root);
-      return;
-    });
-  })
-
-}
 
 userSchema.statics.login = function(userInfo, cb) {
   // look for user in database
@@ -120,12 +95,12 @@ userSchema.statics.register = function(userInfo, cb) {
           if(err || !savedUser) return cb('Username or email already taken.');
           if(savedUser.email.length){
              var emailData = {
-               from: 'welcome@greenit.com',
+               from: 'welcome@startcoding.com',
                to: savedUser.email,
-               subject: 'Welcome To GreenIt!',
-               text: 'Hello there '+ savedUser.username + '! Congratulations on joining GreenIt!\n\n' +
+               subject: 'Welcome To StartCoding.org!',
+               text: 'Hello there '+ savedUser.username + '! Congratulations on joining StartCoding.org!\n\n' +
                  'You are joining an awesome website of user driven content, anonymous and safe! Click the link below to get started! \n\n' +
-                 'http://paulgoblin.github.io/greenit-frontend/'+ '\n\n'
+                 'http://robertsonsamuel.github.io/startcoding-backend/'+ '\n\n'
              };
              mailgun.messages().send(emailData, function (err, body) {
                console.log("mailgun Error", err);
@@ -169,9 +144,9 @@ userSchema.statics.recovery = function(req, cb){
       },
       function(token, user, done) {
         var emailData = {
-          from: 'passwordreset@greenit.com',
+          from: 'passwordreset@startcoding.com',
           to: req.body.email,
-          subject: 'Greenit Password Reset',
+          subject: 'StartCoding.org Password Reset',
           text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
             'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
             'http://' + req.headers.host + '/resetPassword/' + token + '\n\n' +
@@ -218,7 +193,7 @@ userSchema.statics.reset = function(req, cb){
     },
     function(user, done) {
       var emailData = {
-        from: 'passwordreset@greenit.com',
+        from: 'passwordreset@startcoding.com',
         to: user.email,
         subject: 'Your password has been changed',
         text: 'Hello,\n\n' +

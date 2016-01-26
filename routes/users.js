@@ -33,7 +33,6 @@ router.post('/reset/:token', (req, res) => {
 router.get('/:userId', authMiddleware, (req, res) => {
   if (req.params.userId !== req.userId) return res.status(403).send("unauthorized");
   User.findById(req.params.userId)
-  .select('+greenResources')
   .exec((err, user) => {
     res.status(err ? 400 : 200).send(err || user);
   })
