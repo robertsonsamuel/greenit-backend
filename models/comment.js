@@ -175,15 +175,27 @@ commentSchema.statics.vote = (req, cb) => {
       return cb("invalid vote");
     }
 
-
-    foundUser.save( (err, savedUser) => {
-      if (err) return cb(err);
-      let increments =  { $inc: { upvotes: upInc, downvotes: downInc } };
-      Comment.findByIdAndUpdate(foundComment._id, increments, (err, updatedComment) => {
-        if (err) return cb(err);
-        return cb(null, savedUser);
+    let saveUser = new Promise( (resolve, reject) => {
+      foundUser.save( (err, savedUser) => {
+        if (err) return reject(err);
+        resolve(savedUser);
       })
     })
+
+    let updateComment = new Promise( (resolve, reject) => {
+      let increments =  { $inc: { upvotes: upInc, downvotes: downInc } };
+      Comment.findByIdAndUpdate(foundComment._id, increments, (err, updatedComment) => {
+        if (err) return reject(err);
+        resolve(updatedComment);
+      })
+    })
+
+    Promise.all([updateComment, saveUser]).then( (commentAndUserArr) => {
+      return cb(null, commentAndUserArr[1]);
+    }, (err) => {
+      return cb(err);
+    })
+
   }
 };
 
@@ -191,31 +203,19 @@ commentSchema.statics.vote = (req, cb) => {
 let errMsg = "Error posting comment";
 commentSchema.path('user').validate(function (value, respond) {
   User.findById({_id: value}, function (err, foundUser) {
-    if (err || !foundUser) {
-      respond(false);
-    } else {
-      respond(true);
-    }
+    respond(!err && !!foundUser)
   });
 }, 'Error validating user');
 
 commentSchema.path('root').validate(function (value, respond) {
   Resource.findById({_id: value}, function (err, foundResource) {
-    if (err || !foundResource) {
-      respond(false);
-    } else {
-      respond(true);
-    }
+    respond(!err && !!foundResource)
   });
 }, 'Error validating root');
 
 commentSchema.path('parent').validate(function (value, respond) {
   Comment.findById({_id: value}, function (err, foundComment) {
-    if (err || !foundComment) {
-      respond(false);
-    } else {
-      respond(true);
-    }
+    respond(!err && !!foundComment)
   });
 }, 'Error validating parent comment');
 
