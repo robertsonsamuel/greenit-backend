@@ -14,16 +14,102 @@ let resourceSchema = mongoose.Schema({
   body: { type: String, default: "" },
   category: { type: String, default: "general" },
   user: { type: mongoose.Schema.Types.ObjectId , ref: 'User', required: true },
-  timestamp: { type : Date, default: Date.now }
+  timestamp: { type : Date, default: Date.now },
+  upvotes: { type: Number, default: 0 },
+  downvotes: { type: Number, default: 0 }
 });
 
-
 resourceSchema.statics.createNewResource = (newResource, userId, cb) => {
-  newResource.category = newResource.category.replace(/\W/g, '').toLowerCase();
+  newResource.category = (newResource.category || '').replace(/\W/g, '').toLowerCase();
+  if (!newResource.category) newResource.category = "general";
   newResource.user = userId;
   Resource.create(newResource, (err, savedResource) => {
     return err ? cb(err) : cb(null, savedResource);
   });
+};
+
+resourceSchema.statics.vote = (req, cb) => {
+
+  let findResource = new Promise((resolve, reject) => {
+    Resource.findById(req.params.resourceId, (err, resource) => {
+      if (err || !resource) return reject(err || "no resource found");
+      resolve(resource);
+    });
+  });
+
+  let findUser = new Promise((resolve, reject) => {
+    User.findById(req.userId, (err, user) => {
+      if (err || !user) return reject(err || "no user found");
+      resolve(user);
+    });
+  });
+
+  Promise.all([findResource, findUser]).then( applyVote, (err) => {
+    cb(err);
+  });
+
+  function applyVote(resourceAndUserArr) {
+    let foundResource = resourceAndUserArr[0];
+    let foundUser = resourceAndUserArr[1];
+    let vote = req.body.vote
+
+
+    let upIndex = foundUser.upvotes.indexOf(foundResource._id);
+    if (upIndex === -1) upIndex = Infinity;
+    let downIndex = foundUser.downvotes.indexOf(foundResource._id);
+    if (downIndex === -1) downIndex = Infinity;
+
+    let downInc = 0;
+    let upInc = 0;
+
+    if (vote === 'up'){
+      if (upIndex === Infinity) {
+        // the user has no upvote for this resource
+        upInc++;
+        foundUser.upvotes.push(foundResource._id);
+        downInc -= foundUser.downvotes.splice(downIndex, 1).length;
+      } else {
+        // the user has an upvote for this resource;
+        upInc--;
+        foundUser.upvotes.splice(upIndex,1);
+      }
+    } else if (vote ==='down') {
+      if (downIndex === Infinity) {
+        // the user has no downvote for this resource
+        downInc++;
+        foundUser.downvotes.push(foundResource._id);
+        upInc -= foundUser.upvotes.splice(upIndex, 1).length;
+      } else {
+        // the user has a downvote for this resource;
+        downInc--;
+        foundUser.downvotes.splice(downIndex,1);
+      }
+    } else {
+      return cb("invalid vote");
+    }
+
+    let saveUser = new Promise( (resolve, reject) => {
+      foundUser.save( (err, savedUser) => {
+        if (err) return reject(err);
+        resolve(savedUser);
+      })
+    })
+
+    let updateResource = new Promise( (resolve, reject) => {
+      let increments =  { $inc: { upvotes: upInc, downvotes: downInc } };
+      Resource.findByIdAndUpdate(foundResource._id, increments, (err, updatedResource) => {
+        if (err) return reject(err);
+        resolve(updatedResource);
+      })
+    })
+
+    Promise.all([updateResource, saveUser]).then( (resourceAndUserArr) => {
+      return cb(null, resourceAndUserArr[1]);
+    }, (err) => {
+      return cb(err);
+    })
+
+  }
 };
 
 // VALIDATORS

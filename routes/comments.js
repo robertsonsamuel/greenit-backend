@@ -10,7 +10,7 @@ let router = express.Router();
 router.get('/:root', (req, res) => {
   Comment.find({'root' : req.params.root })
   .sort({'timestamp': -1})
-  .populate('user').exec((err, comments) => {
+  .populate({ path: 'user', select: 'username _id'}).exec((err, comments) => {
     res.status( err ? 400 : 200).send(err || Comment.treeify(comments));
   });
 });
