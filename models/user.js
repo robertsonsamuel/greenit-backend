@@ -93,14 +93,14 @@ userSchema.statics.register = function(userInfo, cb) {
 
         newUser.save((err, savedUser) => {
           if(err || !savedUser) return cb('Username or email already taken.');
-          if(savedUser.email.length){
+          if(savedUser.email){
              var emailData = {
                from: 'welcome@startcoding.com',
                to: savedUser.email,
                subject: 'Welcome To StartCoding.org!',
                text: 'Hello there '+ savedUser.username + '! Congratulations on joining StartCoding.org!\n\n' +
                  'You are joining an awesome website of user driven content, anonymous and safe! Click the link below to get started! \n\n' +
-                 'http://robertsonsamuel.github.io/startcoding-backend/'+ '\n\n'
+                 'http://robertsonsamuel.github.io/startcoding-frontend/'+ '\n\n'
              };
              mailgun.messages().send(emailData, function (err, body) {
                console.log("mailgun Error", err);

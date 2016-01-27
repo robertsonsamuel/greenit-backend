@@ -7,6 +7,7 @@ let Resource;
 
 let resourceSchema = mongoose.Schema({
   title: { type: String, required: true },
+  link: { type: String, required: true},
   body: { type: String, default: "" },
   user: { type: mongoose.Schema.Types.ObjectId , ref: 'User' },
   timestamp: { type : Date, default: Date.now }
