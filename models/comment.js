@@ -87,6 +87,8 @@ commentSchema.statics.treeify = (comments) => {
 
   let childrenDictionary = comments.reduce((childrenDictionary, comment) => {
     comment = comment.toObject();
+    comment.score = comment.upvotes - comment.downvotes;
+
 
     let parent = comment.parent || 'root';
     if (childrenDictionary[parent]) {
@@ -101,9 +103,7 @@ commentSchema.statics.treeify = (comments) => {
     if (!childrenDictionary[post]) return [];
 
     childrenDictionary[post].sort((commentA, commentB) => {
-      let commentAscore = commentA.upvotes.length - commentA.downvotes.length;
-      let commentBscore = commentB.upvotes.length - commentB.downvotes.length;
-      return commentBscore - commentAscore;
+      return commentB.score - commentA.score;
     });
 
     return childrenDictionary[post].map(child => {
