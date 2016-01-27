@@ -28,4 +28,16 @@ router.post('/vote/:resourceId', authMiddleware, (req, res) => {
   })
 })
 
+router.put('/:resourceId', authMiddleware, (req, res) => {
+  Resource.editResource(req, (err, editedResource) => {
+    res.status( err ? 400 : 200).send(err || editedResource);
+  })
+});
+
+router.delete('/:resourceId', authMiddleware, (req, res) => {
+  Resource.deleteResource(req, (err, success) => {
+    res.status( err ? 400 : 200).send(err || success);
+  })
+});
+
 module.exports = router;

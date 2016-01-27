@@ -16,6 +16,7 @@ let resourceSchema = mongoose.Schema({
   category: { type: String, default: "general" },
   user: { type: mongoose.Schema.Types.ObjectId , ref: 'User', required: true },
   timestamp: { type : Date, default: Date.now },
+  editTime: { type : Date, default: null },
   upvotes: { type: Number, default: 0 },
   downvotes: { type: Number, default: 0 }
 });
@@ -28,6 +29,46 @@ resourceSchema.statics.createNewResource = (newResource, userId, cb) => {
     return err ? cb(err) : cb(null, savedResource);
   });
 };
+
+
+resourceSchema.statics.editResource = (req, cb) => {
+
+  let resourceUpdate = req.body
+    , updateId       = req.params.resourceId
+    , userId         = req.userId;
+
+  let errMsg = "error updating resource";
+  Resource.findOne({ _id: updateId, user: userId, timestamp: { $ne: null } }, (err, foundResource) => {
+    if (err || !foundResource) return cb(err || errMsg);
+    foundResource.body = req.body.body;
+    foundResource.editTime = Date.now();
+    foundResource.save( err => {
+      if (err) return cb(err);
+      return cb(null, foundResource);
+    })
+  })
+};
+
+resourceSchema.statics.deleteResource = (req, cb) => {
+
+  let updateId = req.params.resourceId
+    , userId   = req.userId;
+
+  let errMsg = "error deleteing resource";
+  Resource.findOne({ _id: updateId, user: userId, timestamp: { $ne: null } }, (err, foundResource) => {
+    if (err || !foundResource) return cb(err || errMsg);
+    foundResource.title = '[deleted]';
+    foundResource.link = '[deleted]';
+    foundResource.body = '[deleted]';
+    foundResource.editTime = null;
+    foundResource.timestamp = null;
+    foundResource.save( err => {
+      if (err) return cb(err);
+      return cb(null, foundResource);
+    })
+  })
+};
+
 
 resourceSchema.statics.condition = (resources) => {
 

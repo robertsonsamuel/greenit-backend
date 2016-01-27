@@ -45,15 +45,13 @@ commentSchema.statics.createNewComment = (req, cb) => {
 
 commentSchema.statics.editComment = (req, cb) => {
 
-  var commentUpdate = req.body
-    , updateId     = req.params.commentId
+  let commentUpdate = req.body
+    , updateId      = req.params.commentId
     , userId        = req.userId;
 
-  var errMsg = "error updating comment";
-  Comment.findById(updateId, (err, foundComment) => {
-    if (foundComment.timestamp === null) return cb("Comment has been deleted");
+  let errMsg = "error updating comment";
+  Comment.findOne({ _id: updateId, user: userId, timestamp: { $ne: null } }, (err, foundComment) => {
     if (err || !foundComment) return cb(err || errMsg);
-    if (foundComment.user != userId) return cb(errMsg);
     foundComment.body = req.body.body;
     foundComment.editTime = Date.now();
     foundComment.save( err => {
@@ -65,14 +63,12 @@ commentSchema.statics.editComment = (req, cb) => {
 
 commentSchema.statics.deleteComment = (req, cb) => {
 
-  var updateId = req.params.commentId
+  let updateId = req.params.commentId
     , userId   = req.userId;
 
-  var errMsg = "error deleteing comment";
-  Comment.findById(updateId, (err, foundComment) => {
+  let errMsg = "error deleteing comment";
+  Comment.findOne({ _id: updateId, user: userId, timestamp: { $ne: null } }, (err, foundComment) => {
     if (err || !foundComment) return cb(err || errMsg);
-    if (foundComment.user != userId) return cb(errMsg);
-    if (foundComment.timestamp === null) return cb("Comment already deleted")
     foundComment.body = '[deleted]';
     foundComment.editTime = null;
     foundComment.timestamp = null;
