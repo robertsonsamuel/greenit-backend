@@ -18,7 +18,9 @@ let userSchema = mongoose.Schema({
   password: {type: String, required: true, select: false},
   email: {type: String, select: false},
   resetPasswordToken: {type: String, select: false },
-  resetPasswordExpires: {type: Date , select:false}
+  resetPasswordExpires: {type: Date , select:false },
+  upvotes: {type: [{ type: mongoose.Schema.Types.ObjectId , ref: 'Comment' }], default: [] },
+  downvotes: {type: [{ type: mongoose.Schema.Types.ObjectId , ref: 'Comment' }], default: [] }
 });
 
 userSchema.methods.token = function() {

@@ -1,7 +1,7 @@
 'use strict';
 
 const mongoose = require('mongoose')
-    , Resource    = require('./resource')
+    , Resource = require('./resource')
     , User     = require('./user');
 
 let Comment;
@@ -13,8 +13,8 @@ let commentSchema = mongoose.Schema({
   parent: { type: mongoose.Schema.Types.ObjectId , ref: 'Comment' },
   timestamp: { type : Date, default: Date.now},
   editTime: { type : Date, default: null },
-  upvotes: { type: [{ type: mongoose.Schema.Types.ObjectId , ref: 'User' }], default: [] },
-  downvotes: { type: [{ type: mongoose.Schema.Types.ObjectId , ref: 'User' }], default: [] }
+  upvotes: { type: Number, default: 0 },
+  downvotes: { type: Number, default: 0 }
 });
 
 commentSchema.statics.createNewComment = (req, cb) => {
@@ -25,7 +25,6 @@ commentSchema.statics.createNewComment = (req, cb) => {
     , userId     = req.userId;
 
   newComment.user = req.userId;
-  newComment.upvotes = [req.userId];
 
   if (seed==="true") {
     newComment.root = params.parent;
@@ -42,7 +41,6 @@ commentSchema.statics.createNewComment = (req, cb) => {
       });
     })
   }
-
 };
 
 commentSchema.statics.editComment = (req, cb) => {
@@ -118,37 +116,75 @@ commentSchema.statics.treeify = (comments) => {
 };
 
 commentSchema.statics.vote = (req, cb) => {
-  Comment.findById(req.params.commentId, (err, comment) => {
-    if (err || !comment) return cb(err || errMsg);
-    console.log("userId", req.userId);
-    User.findById(req.userId, (err, foundUser) => {
-      if (err || !foundUser) return cb(err || errMsg);
-      if (req.body.vote === 'up') {
-        let voteIndex = comment.upvotes.indexOf(req.userId);
-        (voteIndex === -1) ? comment.upvotes.push(req.userId)
-                           : comment.upvotes.splice(voteIndex, 1);
 
-        let filteredDownvotes = comment.downvotes.filter(user => user != req.userId);
-        comment.downvotes = filteredDownvotes;
-        comment.save( err => {
-          if (err) return cb(err);
-          return cb(null, "ok");
-        })
-      } else if (req.body.vote === 'down') {
-        let voteIndex = comment.downvotes.indexOf(req.userId);
-        (voteIndex === -1) ? comment.downvotes.push(req.userId)
-                           : comment.downvotes.splice(voteIndex, 1);
-        let filteredUpvotes = comment.upvotes.filter(user => user != req.userId);
-        comment.upvotes = filteredUpvotes;
-        comment.save( err => {
-          if (err) return cb(err);
-          return cb(null, "ok");
-        })
+  let findComment = new Promise((resolve, reject) => {
+    Comment.findById(req.params.commentId, (err, comment) => {
+      if (err || !comment) return reject(err || "no comment found");
+      resolve(comment);
+    });
+  });
+
+  let findUser = new Promise((resolve, reject) => {
+    User.findById(req.userId, (err, user) => {
+      if (err || !user) return reject(err || "no user found");
+      resolve(user);
+    });
+  });
+
+  Promise.all([findComment, findUser]).then( applyVote, (err) => {
+    cb(err);
+  });
+
+  function applyVote(commentAndUserArr) {
+    let foundComment = commentAndUserArr[0];
+    let foundUser = commentAndUserArr[1];
+    let vote = req.body.vote
+
+
+    let upIndex = foundUser.upvotes.indexOf(foundComment._id);
+    if (upIndex === -1) upIndex = Infinity;
+    let downIndex = foundUser.downvotes.indexOf(foundComment._id);
+    if (downIndex === -1) downIndex = Infinity;
+
+    let downInc = 0;
+    let upInc = 0;
+
+    if (vote === 'up'){
+      if (upIndex === Infinity) {
+        // the user has no upvote for this comment
+        upInc++;
+        foundUser.upvotes.push(foundComment._id);
+        downInc -= foundUser.downvotes.splice(downIndex, 1).length;
       } else {
-        return cb('incorrect vote direction');
+        // the user has an upvote for this comment;
+        upInc--;
+        foundUser.upvotes.splice(upIndex,1);
       }
+    } else if (vote ==='down') {
+      if (downIndex === Infinity) {
+        // the user has no downvote for this comment
+        downInc++;
+        foundUser.downvotes.push(foundComment._id);
+        upInc -= foundUser.upvotes.splice(upIndex, 1).length;
+      } else {
+        // the user has a downvote for this comment;
+        downInc--;
+        foundUser.downvotes.splice(downIndex,1);
+      }
+    } else {
+      return cb("invalid vote");
+    }
+
+
+    foundUser.save( (err, savedUser) => {
+      if (err) return cb(err);
+      let increments =  { $inc: { upvotes: upInc, downvotes: downInc } };
+      Comment.findByIdAndUpdate(foundComment._id, increments, (err, updatedComment) => {
+        if (err) return cb(err);
+        return cb(null, savedUser);
+      })
     })
-  })
+  }
 };
 
 // VALIDATORS
