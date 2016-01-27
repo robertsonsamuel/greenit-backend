@@ -71,17 +71,16 @@ resourceSchema.statics.deleteResource = (req, cb) => {
 
 
 resourceSchema.statics.condition = (resources) => {
-
-  resources = resources.map( (resource) => {
-    resource = resource.toObject();
-    // you can adjust the score calculation here however you want
-    resource.score = resource.upvotes - resource.downvotes;
-    return resource;
-  });
-
-  return resources.sort((resourceA, resourceB) => {
-    return resourceB.score - resourceA.score;
-  }).slice(0, NUM_TO_RETURN);
+  return resources
+    .map((resource) => {
+      // you can adjust the score calculation here however you want
+      resource.score = resource.upvotes - resource.downvotes;
+      return resource;
+    })
+    .sort((resourceA, resourceB) => {
+      return resourceB.score - resourceA.score;
+    })
+    .slice(0, NUM_TO_RETURN);
 }
 
 

@@ -20,7 +20,7 @@ let commentSchema = mongoose.Schema({
 commentSchema.statics.createNewComment = (req, cb) => {
 
   var newComment = req.body
-    , seed     = req.query.seed
+    , seed       = req.query.seed
     , params     = req.params
     , userId     = req.userId;
 
@@ -82,9 +82,7 @@ commentSchema.statics.deleteComment = (req, cb) => {
 commentSchema.statics.treeify = (comments) => {
 
   let childrenDictionary = comments.reduce((childrenDictionary, comment) => {
-    comment = comment.toObject();
     comment.score = comment.upvotes - comment.downvotes;
-
 
     let parent = comment.parent || 'root';
     if (childrenDictionary[parent]) {
