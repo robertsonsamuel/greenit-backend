@@ -11,22 +11,21 @@ const PORT         = process.env.PORT || 3000
     , mongoose     = require('mongoose')
     , mongoUrl     = process.env.MONGOLAB_URI || 'mongodb://localhost/startcoding';
 
+mongoose.connect(mongoUrl);
 
-mongoose.connect(mongoUrl)
+let app = express();
 
-var app = express();
-
-//cors
-var whitelist = ['http://robertsonsamuel.github.io', 'http://localhost:8000'];
-var corsOptions = {
-  origin: function(origin, callback){
-    var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
+// CORS
+let whitelist = ['http://robertsonsamuel.github.io', 'http://localhost:8000'];
+let corsOptions = {
+  origin: function(origin, callback) {
+    let originIsWhitelisted = whitelist.indexOf(origin) !== -1;
     callback(null, originIsWhitelisted);
   }
 };
 app.use(cors(corsOptions));
 
-//VIEWS
+// VIEWS
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
@@ -45,11 +44,11 @@ app.use('/resources', require('./routes/resources'));
 app.use('/comments', require('./routes/comments'));
 
 // 404 HANDLER
-app.use(function(req, res){
+app.use((req, res) => {
   res.status(404).send('route not found')
 })
 
-//Listen
-app.listen(PORT, function(){
+// LISTEN
+app.listen(PORT, () => {
   console.log('Listening on port ', PORT);
 });

@@ -6,6 +6,7 @@ const mongoose = require('mongoose')
 
 let Comment;
 
+
 let commentSchema = mongoose.Schema({
   body: { type: String, required: true },
   user: { type: mongoose.Schema.Types.ObjectId , ref: 'User', required: true },
@@ -17,9 +18,9 @@ let commentSchema = mongoose.Schema({
   downvotes: { type: Number, default: 0 }
 });
 
-commentSchema.statics.createNewComment = (req, cb) => {
 
-  var newComment = req.body
+commentSchema.statics.createNewComment = (req, cb) => {
+  let newComment = req.body
     , seed       = req.query.seed
     , params     = req.params
     , userId     = req.userId;
@@ -43,8 +44,8 @@ commentSchema.statics.createNewComment = (req, cb) => {
   }
 };
 
-commentSchema.statics.editComment = (req, cb) => {
 
+commentSchema.statics.editComment = (req, cb) => {
   let commentUpdate = req.body
     , updateId      = req.params.commentId
     , userId        = req.userId;
@@ -61,8 +62,8 @@ commentSchema.statics.editComment = (req, cb) => {
   })
 };
 
-commentSchema.statics.deleteComment = (req, cb) => {
 
+commentSchema.statics.deleteComment = (req, cb) => {
   let updateId = req.params.commentId
     , userId   = req.userId;
 
@@ -79,8 +80,8 @@ commentSchema.statics.deleteComment = (req, cb) => {
   })
 };
 
-commentSchema.statics.treeify = (comments) => {
 
+commentSchema.statics.treeify = (comments) => {
   let childrenDictionary = comments.reduce((childrenDictionary, comment) => {
     comment.score = comment.upvotes - comment.downvotes;
 
@@ -109,8 +110,8 @@ commentSchema.statics.treeify = (comments) => {
   return populatePost('root');
 };
 
-commentSchema.statics.vote = (req, cb) => {
 
+commentSchema.statics.vote = (req, cb) => {
   let findComment = new Promise((resolve, reject) => {
     Comment.findById(req.params.commentId, (err, comment) => {
       if (err || !comment) return reject(err || "no comment found");
@@ -133,7 +134,6 @@ commentSchema.statics.vote = (req, cb) => {
     let foundComment = commentAndUserArr[0];
     let foundUser = commentAndUserArr[1];
     let vote = req.body.vote
-
 
     let upIndex = foundUser.upvotes.indexOf(foundComment._id);
     if (upIndex === -1) upIndex = Infinity;
@@ -189,9 +189,9 @@ commentSchema.statics.vote = (req, cb) => {
     }, (err) => {
       return cb(err);
     })
-
   }
 };
+
 
 // VALIDATORS
 let errMsg = "Error posting comment";
@@ -212,6 +212,7 @@ commentSchema.path('parent').validate(function (value, respond) {
     respond(!err && !!foundComment)
   });
 }, 'Error validating parent comment');
+
 
 Comment = mongoose.model('Comment', commentSchema);
 module.exports = Comment;

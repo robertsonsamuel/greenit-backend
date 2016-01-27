@@ -1,7 +1,7 @@
 'use strict';
 
-const express = require('express')
-    , User    = require('../models/user')
+const express        = require('express')
+    , User           = require('../models/user')
     , authMiddleware = require('../util/auth-middleware');
 
 let router = express.Router();

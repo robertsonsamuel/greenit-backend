@@ -13,6 +13,7 @@ const mongoose = require('mongoose')
 
 let User;
 
+
 let userSchema = mongoose.Schema({
   username: {type: String, required: true, unique: true},
   password: {type: String, required: true, select: false},
@@ -22,6 +23,7 @@ let userSchema = mongoose.Schema({
   upvotes: {type: [{ type: mongoose.Schema.Types.ObjectId }], default: [] },
   downvotes: {type: [{ type: mongoose.Schema.Types.ObjectId }], default: [] }
 });
+
 
 userSchema.methods.token = function() {
   let payload = {
@@ -33,6 +35,7 @@ userSchema.methods.token = function() {
   return jwt.encode(payload, process.env.JWT_SECRET);
 };
 
+
 userSchema.statics.login = function(userInfo, cb) {
   // look for user in database
   User.findOne({username: userInfo.username}).select('+password').exec((err, foundUser) => {
@@ -41,7 +44,7 @@ userSchema.statics.login = function(userInfo, cb) {
     bcrypt.compare(userInfo.password, foundUser.password, (err, isGood) => {
       if (err) return cb('server err');
       if (isGood) {
-        var token = foundUser.token()
+        let token = foundUser.token()
         foundUser = foundUser.toObject();
         delete foundUser.password;
         console.log("returning saved user", foundUser);
@@ -52,6 +55,7 @@ userSchema.statics.login = function(userInfo, cb) {
     });
   });
 }
+
 
 userSchema.statics.register = function(userInfo, cb) {
   let username  = userInfo.username
@@ -96,13 +100,13 @@ userSchema.statics.register = function(userInfo, cb) {
         newUser.save((err, savedUser) => {
           if(err || !savedUser) return cb('Username or email already taken.');
           if(savedUser.email){
-             var emailData = {
-               from: 'welcome@startcoding.com',
-               to: savedUser.email,
-               subject: 'Welcome To StartCoding.org!',
-               text: 'Hello there '+ savedUser.username + '! Congratulations on joining StartCoding.org!\n\n' +
-                 'You are joining an awesome website of user driven content, anonymous and safe! Click the link below to get started! \n\n' +
-                 'http://robertsonsamuel.github.io/startcoding-frontend/'+ '\n\n'
+             let emailData = {
+                from: 'welcome@startcoding.com',
+                to: savedUser.email,
+                subject: 'Welcome To StartCoding.org!',
+                text: 'Hello there '+ savedUser.username + '! Congratulations on joining StartCoding.org!\n\n' +
+                      'You are joining an awesome website of user driven content, anonymous and safe! Click the link below to get started!\n\n' +
+                      'http://robertsonsamuel.github.io/startcoding-frontend/\n\n'
              };
              mailgun.messages().send(emailData, function (err, body) {
                console.log("mailgun Error", err);
@@ -110,7 +114,7 @@ userSchema.statics.register = function(userInfo, cb) {
             });
            }
 
-          var token = savedUser.token()
+          let token = savedUser.token()
           savedUser = savedUser.toObject();
           delete savedUser.password;
           console.log("returning saved user", savedUser);
@@ -124,48 +128,48 @@ userSchema.statics.register = function(userInfo, cb) {
 
 userSchema.statics.recovery = function(req, cb){
   async.waterfall([
-      function(done) {
-        crypto.randomBytes(20, function(err, buf) {
-          var token = buf.toString('hex');
-          done(err, token);
-        });
-      },
-      function(token, done) {
-        User.findOne({ email: req.body.email }, function(err, user) {
-          if (!user) {
-            return  cb('No account with that email address exists.', null);
-          }
-          user.resetPasswordToken = token;
-          user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    function(done) {
+      crypto.randomBytes(20, function(err, buf) {
+        let token = buf.toString('hex');
+        done(err, token);
+      });
+    },
+    function(token, done) {
+      User.findOne({ email: req.body.email }, function(err, user) {
+        if (!user) {
+          return  cb('No account with that email address exists.', null);
+        }
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
 
-          user.save(function(err) {
-            if(err) console.log('error saving',err);
-            done(err, token, user);
-          });
+        user.save(function(err) {
+          if(err) console.log('error saving',err);
+          done(err, token, user);
         });
-      },
-      function(token, user, done) {
-        var emailData = {
-          from: 'passwordreset@startcoding.com',
-          to: req.body.email,
-          subject: 'StartCoding.org Password Reset',
-          text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
-            'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-            'http://' + req.headers.host + '/resetPassword/' + token + '\n\n' +
-            'If you did not request this, please ignore this email and your password will remain unchanged.\n'
-        };
-        mailgun.messages().send(emailData, function (err, body) {
-          console.log("mailgun Error", err);
-          done(err, 'Email Sent, check your inbox!');
-        });
-      }
-    ], function(err , message) {
-      if(err) console.log(err);
-      if (err) return cb('There was an error requesting a password reset.');
-      if(message) return cb(null, message)
-    });
-
+      });
+    },
+    function(token, user, done) {
+      let emailData = {
+        from: 'passwordreset@startcoding.com',
+        to: req.body.email,
+        subject: 'StartCoding.org Password Reset',
+        text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
+              'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
+              'http://' + req.headers.host + '/resetPassword/' + token + '\n\n' +
+              'If you did not request this, please ignore this email and your password will remain unchanged.\n'
+      };
+      mailgun.messages().send(emailData, function (err, body) {
+        console.log("mailgun Error", err);
+        done(err, 'Email Sent, check your inbox!');
+      });
+    }
+  ], function(err , message) {
+    if(err) console.log(err);
+    if (err) return cb('There was an error requesting a password reset.');
+    if(message) return cb(null, message)
+  });
 }
+
 
 userSchema.statics.reset = function(req, cb){
   async.waterfall([
@@ -194,12 +198,12 @@ userSchema.statics.reset = function(req, cb){
       });
     },
     function(user, done) {
-      var emailData = {
+      let emailData = {
         from: 'passwordreset@startcoding.com',
         to: user.email,
         subject: 'Your password has been changed',
         text: 'Hello,\n\n' +
-          'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
+              'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
       };
       mailgun.messages().send(emailData, function (err, body) {
         done(err, 'Success! Your email has been sent!');
@@ -210,8 +214,8 @@ userSchema.statics.reset = function(req, cb){
     if(err) return cb("Something wierd happened. Try your new password.")
     if(message) return cb(null, message)
   });
-
 }
+
 
 User = mongoose.model('User', userSchema);
 module.exports = User;

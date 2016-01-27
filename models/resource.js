@@ -1,6 +1,7 @@
 'use strict';
 
 const NUM_TO_RETURN = 50;
+
 const mongoose = require('mongoose')
     , User     = require('./user');
 
@@ -8,6 +9,7 @@ const mongoose = require('mongoose')
 const VALID_CATEGORIES = new Set(['general', 'javascript', 'ruby', 'html', 'css', 'python', 'go', 'swift']);
 
 let Resource;
+
 
 let resourceSchema = mongoose.Schema({
   title: { type: String, required: true },
@@ -21,6 +23,7 @@ let resourceSchema = mongoose.Schema({
   downvotes: { type: Number, default: 0 }
 });
 
+
 resourceSchema.statics.createNewResource = (newResource, userId, cb) => {
   newResource.category = (newResource.category || '').replace(/\W/g, '').toLowerCase();
   if (!newResource.category) newResource.category = "general";
@@ -32,7 +35,6 @@ resourceSchema.statics.createNewResource = (newResource, userId, cb) => {
 
 
 resourceSchema.statics.editResource = (req, cb) => {
-
   let resourceUpdate = req.body
     , updateId       = req.params.resourceId
     , userId         = req.userId;
@@ -49,8 +51,8 @@ resourceSchema.statics.editResource = (req, cb) => {
   })
 };
 
-resourceSchema.statics.deleteResource = (req, cb) => {
 
+resourceSchema.statics.deleteResource = (req, cb) => {
   let updateId = req.params.resourceId
     , userId   = req.userId;
 
@@ -84,9 +86,7 @@ resourceSchema.statics.condition = (resources) => {
 }
 
 
-
 resourceSchema.statics.vote = (req, cb) => {
-
   let findResource = new Promise((resolve, reject) => {
     Resource.findById(req.params.resourceId, (err, resource) => {
       if (err || !resource) return reject(err || "no resource found");
@@ -109,7 +109,6 @@ resourceSchema.statics.vote = (req, cb) => {
     let foundResource = resourceAndUserArr[0];
     let foundUser = resourceAndUserArr[1];
     let vote = req.body.vote
-
 
     let upIndex = foundUser.upvotes.indexOf(foundResource._id);
     if (upIndex === -1) upIndex = Infinity;
@@ -165,9 +164,9 @@ resourceSchema.statics.vote = (req, cb) => {
     }, (err) => {
       return cb(err);
     })
-
   }
 };
+
 
 // VALIDATORS
 resourceSchema.path('user').validate(function (value, respond) {
@@ -179,6 +178,7 @@ resourceSchema.path('user').validate(function (value, respond) {
 resourceSchema.path('category').validate(function (value, respond) {
   respond( VALID_CATEGORIES.has(value) );
 }, 'Error validating resource category');
+
 
 Resource = mongoose.model('Resource', resourceSchema);
 module.exports = Resource;
