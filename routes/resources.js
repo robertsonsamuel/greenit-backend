@@ -12,7 +12,7 @@ router.get('/:category', (req, res) => {
   Resource.find(filter)
   .sort({'timestamp': -1})
   .populate({ path: 'user', select: 'username _id'}).exec((err, resources) => {
-    res.status( err ? 400 : 200).send(err || resources)
+    res.status( err ? 400 : 200).send(err || Resource.condition(resources))
   });
 });
 

@@ -1,5 +1,6 @@
 'use strict';
 
+const NUM_TO_RETURN = 50;
 const mongoose = require('mongoose')
     , User     = require('./user');
 
@@ -27,6 +28,22 @@ resourceSchema.statics.createNewResource = (newResource, userId, cb) => {
     return err ? cb(err) : cb(null, savedResource);
   });
 };
+
+resourceSchema.statics.condition = (resources) => {
+
+  resources = resources.map( (resource) => {
+    resource = resource.toObject();
+    // you can adjust the score calculation here however you want
+    resource.score = resource.upvotes - resource.downvotes;
+    return resource;
+  });
+
+  return resources.sort((resourceA, resourceB) => {
+    return resourceB.score - resourceA.score;
+  }).slice(0, NUM_TO_RETURN);
+}
+
+
 
 resourceSchema.statics.vote = (req, cb) => {
 
