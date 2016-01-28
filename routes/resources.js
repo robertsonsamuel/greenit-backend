@@ -2,7 +2,9 @@
 
 const express        = require('express')
     , Resource       = require('../models/resource')
-    , authMiddleware = require('../util/auth-middleware');
+    , Comment        = require('../models/comment')
+    , authMiddleware = require('../util/auth-middleware')
+    , combinedQuery  = require('../util/combinedQuery');
 
 let router = express.Router();
 
@@ -15,6 +17,12 @@ router.get('/:category', (req, res) => {
   .lean()
   .populate({ path: 'user', select: 'username _id' }).exec((err, resources) => {
     res.status(err ? 400 : 200).send(err || Resource.condition(resources));
+  });
+});
+
+router.get('/one/:id', (req, res) => {
+  combinedQuery.fullResource(req.params.id, (err, fullResource) => {
+    res.status(err ? 400 : 200).send(err || fullResource);
   });
 });
 
