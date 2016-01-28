@@ -194,7 +194,6 @@ commentSchema.statics.vote = (req, cb) => {
 
 
 // VALIDATORS
-let errMsg = "Error posting comment";
 commentSchema.path('user').validate(function (value, respond) {
   User.findById({_id: value}, function (err, foundUser) {
     respond(!err && !!foundUser)

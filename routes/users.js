@@ -2,9 +2,26 @@
 
 const express        = require('express')
     , User           = require('../models/user')
-    , authMiddleware = require('../util/auth-middleware');
+    , Resource           = require('../models/resource')
+    , authMiddleware = require('../util/auth-middleware')
+    , combinedQuery  = require('../util/combinedQuery');
+
 
 let router = express.Router();
+
+router.get('/:userId', authMiddleware, (req, res) => {
+  if (req.params.userId !== req.userId) return res.status(403).send("unauthorized");
+  User.findById(req.params.userId)
+  .exec((err, user) => {
+    res.status(err ? 400 : 200).send(err || user);
+  })
+})
+
+router.post('/saveResource/:resourceId', authMiddleware, (req, res) => {
+  combinedQuery.saveResource(req.params.resourceId, req.userId, (err, user) => {
+    res.status(err ? 400 : 200).send(err || user);
+  })
+})
 
 router.post('/register', (req, res) => {
   User.register(req.body, (err, token) => {
@@ -29,15 +46,5 @@ router.post('/reset/:token', (req, res) => {
     res.status(err ? 400 : 200).send(err || message)
   })
 })
-
-router.get('/:userId', authMiddleware, (req, res) => {
-  if (req.params.userId !== req.userId) return res.status(403).send("unauthorized");
-  User.findById(req.params.userId)
-  .exec((err, user) => {
-    res.status(err ? 400 : 200).send(err || user);
-  })
-})
-
-
 
 module.exports = router;

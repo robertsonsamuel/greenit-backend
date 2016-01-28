@@ -21,7 +21,8 @@ let userSchema = mongoose.Schema({
   resetPasswordToken: {type: String, select: false },
   resetPasswordExpires: {type: Date , select: false },
   upvotes: {type: [{ type: mongoose.Schema.Types.ObjectId }], default: [] },
-  downvotes: {type: [{ type: mongoose.Schema.Types.ObjectId }], default: [] }
+  downvotes: {type: [{ type: mongoose.Schema.Types.ObjectId }], default: [] },
+  savedResources: {type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Resource" }], default: [] }
 });
 
 
