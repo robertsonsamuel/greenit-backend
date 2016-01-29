@@ -7,6 +7,9 @@
     "start": "node server.js",
     "setup": "rm -rf node_modules && npm i"
   },
+  "engines": {
+    "node": "5.5.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/robertsonsamuel/startcoding-backend.git"
