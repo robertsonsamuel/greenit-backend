@@ -53,9 +53,11 @@ resourceSchema.statics.filterByCategoryAndTags = (req, cb) => {
 //   resources: the resources modified with a score and sorted by that score
 resourceSchema.statics.condition = (resources) => {
   let tags = resources.reduce((tags, resource) => {
-    resource.tags.forEach(tag => {
-      tags[tag] = tags[tag] ? tags[tag] + 1 : 1;
-    });
+    if (resource.tags) {
+      resource.tags.forEach(tag => {
+        tags[tag] = tags[tag] ? tags[tag] + 1 : 1;
+      });
+    }
     return tags;
   }, {});
 
