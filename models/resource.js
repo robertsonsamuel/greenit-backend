@@ -49,13 +49,15 @@ resourceSchema.statics.filterByCategoryAndTags = (req, cb) => {
 
 
 // takes an array of resources and returns an object with properties:
-//   tags: an array of all unique tags on the resources
+//   tags: an object of all unique tags on the resources with frequency counts
 //   resources: the resources modified with a score and sorted by that score
 resourceSchema.statics.condition = (resources) => {
   let tags = resources.reduce((tags, resource) => {
-    resource.tags.forEach(tag => tags.add(tag));
+    resource.tags.forEach(tag => {
+      tags[tag] = tags[tag] ? tags[tag] + 1 : 1;
+    });
     return tags;
-  }, new Set());
+  }, {});
 
   let conditioned = resources
     .map((resource) => {
@@ -69,7 +71,7 @@ resourceSchema.statics.condition = (resources) => {
     .slice(0, NUM_TO_RETURN);
 
   return {
-    tags: Array.from(tags),
+    tags: tags,
     resources: conditioned
   };
 }
