@@ -1,6 +1,6 @@
 'use strict';
 
-const NUM_TO_RETURN = 50;
+const NUM_TO_RETURN = 50; // used in the 'condition' method
 
 const mongoose = require('mongoose')
     , User     = require('./user');
@@ -20,13 +20,71 @@ let resourceSchema = mongoose.Schema({
   timestamp: { type : Date, default: Date.now },
   editTime: { type : Date, default: null },
   upvotes: { type: Number, default: 0 },
-  downvotes: { type: Number, default: 0 }
+  downvotes: { type: Number, default: 0 },
+  tags: { type: [{ type: String }], default: [] }
+  // CONVENTION: categories and tags should be lowercase and contain only letters
 });
 
 
+// retrieves resources within a given category that
+//   - match all given tags and
+//   - have not been deleted
+resourceSchema.statics.filterByCategoryAndTags = (req, cb) => {
+  let filter = (req.params.category === 'all') ? {} : { category: req.params.category };
+  if (req.query.tags) {
+    let tags = req.query.tags.split(',').map(tag => {
+      return { tags: tag };
+    });
+    filter['$and'] = tags;
+  }
+  filter.timestamp = { $ne: null };
+
+  Resource.find(filter)
+  .sort({'timestamp': -1})
+  .lean()
+  .populate({ path: 'user', select: 'username _id' }).exec((err, resources) => {
+    return err ? cb(err) : cb(null, resources);
+  });
+};
+
+
+// takes an array of resources and returns an object with properties:
+//   tags: an object of all unique tags on the resources with frequency counts
+//   resources: the resources modified with a score and sorted by that score
+resourceSchema.statics.condition = (resources) => {
+  let tags = resources.reduce((tags, resource) => {
+    resource.tags.forEach(tag => {
+      tags[tag] = tags[tag] ? tags[tag] + 1 : 1;
+    });
+    return tags;
+  }, {});
+
+  let conditioned = resources
+    .map((resource) => {
+      // you can adjust the score calculation here
+      resource.score = resource.upvotes - resource.downvotes;
+      return resource;
+    })
+    .sort((resourceA, resourceB) => {
+      return resourceB.score - resourceA.score;
+    })
+    .slice(0, NUM_TO_RETURN);
+
+  return {
+    tags: tags,
+    resources: conditioned
+  };
+}
+
+
+String.prototype.sanitize = function() {
+  return this.replace(/\W/g, '').toLowerCase();
+}
+
 resourceSchema.statics.createNewResource = (newResource, userId, cb) => {
-  newResource.category = (newResource.category || '').replace(/\W/g, '').toLowerCase();
+  newResource.category = (newResource.category || '').sanitize();
   if (!newResource.category) newResource.category = "general";
+  newResource.tags = newResource.tags.map(tag => tag.sanitize());
   newResource.user = userId;
   Resource.create(newResource, (err, savedResource) => {
     return err ? cb(err) : cb(null, savedResource);
@@ -70,20 +128,6 @@ resourceSchema.statics.deleteResource = (req, cb) => {
     })
   })
 };
-
-
-resourceSchema.statics.condition = (resources) => {
-  return resources
-    .map((resource) => {
-      // you can adjust the score calculation here however you want
-      resource.score = resource.upvotes - resource.downvotes;
-      return resource;
-    })
-    .sort((resourceA, resourceB) => {
-      return resourceB.score - resourceA.score;
-    })
-    .slice(0, NUM_TO_RETURN);
-}
 
 
 resourceSchema.statics.vote = (req, cb) => {
