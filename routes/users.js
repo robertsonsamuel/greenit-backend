@@ -19,7 +19,7 @@ router.get('/:userId', authMiddleware, (req, res) => {
 
 router.post('/saveResource/:resourceId', authMiddleware, (req, res) => {
   combinedQuery.saveResource(req.params.resourceId, req.userId, (err, user) => {
-    res.status(err ? 400 : 200).send(err || user);
+    res.status(err ? 400 : 200).send(err || user.savedResources);
   })
 })
 

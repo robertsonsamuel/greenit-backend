@@ -40,18 +40,18 @@ userSchema.methods.token = function() {
 userSchema.statics.login = function(userInfo, cb) {
   // look for user in database
   User.findOne({username: userInfo.username}).select('+password').exec((err, foundUser) => {
-    if (err) return cb('server error');
-    if (!foundUser) return cb('incorrect username or password');
+    if (err) return cb('Server Error');
+    if (!foundUser) return cb('Incorrect username or password.');
     bcrypt.compare(userInfo.password, foundUser.password, (err, isGood) => {
-      if (err) return cb('server err');
+      if (err) return cb('Server Error');
       if (isGood) {
         let token = foundUser.token()
         foundUser = foundUser.toObject();
         delete foundUser.password;
-        console.log("returning saved user", foundUser);
+        console.log("Returning saved user", foundUser);
         return cb(err, token );
       } else {
-        return cb('incorrect username or password');
+        return cb('Incorrect username or password.');
       }
     });
   });
@@ -66,26 +66,26 @@ userSchema.statics.register = function(userInfo, cb) {
 
   // compare passwords
   if (password !== password2) {
-    return cb("passwords don't match");
+    return cb("Passwords don't match.");
   }
 
   // validate password
   if (!CONFIG.validatePassword(password)) {
-    return cb('invalid password');
+    return cb('Invalid password.');
   }
 
   // validate username
   if (!CONFIG.validateUsername(username)) {
-    return cb('invalid username');
+    return cb('Invalid username.');
   }
 
   // create user model
   let newUserQuery = email ? { $or: [{email: email}, {username: username}] } : {username: username};
   User.findOne(newUserQuery).select('+email').exec((err, user) => {
-    if (err) return cb('error registering username');
+    if (err) return cb('Error registering username.');
     if (user) {
-      if (username === user.username) return cb('username taken');
-      if (email === user.email) return cb('email taken');
+      if (username === user.username) return cb('Username taken.');
+      if (email === user.email) return cb('Email taken.');
     }
     bcrypt.genSalt(CONFIG.saltRounds, (err, salt) => {
       if (err) return cb(err);

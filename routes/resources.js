@@ -11,7 +11,6 @@ let router = express.Router();
 router.get('/:category', (req, res) => {
   let filter = (req.params.category === 'all') ? {} : { category: req.params.category };
   filter.timestamp = { $ne: null };
-
   Resource.find(filter)
   .sort({'timestamp': -1})
   .lean()
