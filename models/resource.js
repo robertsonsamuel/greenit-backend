@@ -20,8 +20,28 @@ let resourceSchema = mongoose.Schema({
   timestamp: { type : Date, default: Date.now },
   editTime: { type : Date, default: null },
   upvotes: { type: Number, default: 0 },
-  downvotes: { type: Number, default: 0 }
+  downvotes: { type: Number, default: 0 },
+  tags: { type: [{ type: String }], default: [] }
 });
+
+
+resourceSchema.statics.filterByCategoryAndTags = (req, cb) => {
+  let filter = (req.params.category === 'all') ? {} : { category: req.params.category };
+  if (req.query.tags) {
+    let tags = req.query.tags.split(',').map(tag => {
+      return { tags: tag };
+    });
+    filter['$and'] = tags;
+  }
+  filter.timestamp = { $ne: null };
+
+  Resource.find(filter)
+  .sort({'timestamp': -1})
+  .lean()
+  .populate({ path: 'user', select: 'username _id' }).exec((err, resources) => {
+    return err ? cb(err) : cb(null, resources);
+  });
+};
 
 
 resourceSchema.statics.createNewResource = (newResource, userId, cb) => {

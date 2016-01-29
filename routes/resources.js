@@ -8,14 +8,9 @@ const express        = require('express')
 
 let router = express.Router();
 
+// takes a url like /resources/javascript?tags=tag1,tag2,tag3
 router.get('/:category', (req, res) => {
-  let filter = (req.params.category === 'all') ? {} : { category: req.params.category };
-  filter.timestamp = { $ne: null };
-
-  Resource.find(filter)
-  .sort({'timestamp': -1})
-  .lean()
-  .populate({ path: 'user', select: 'username _id' }).exec((err, resources) => {
+  Resource.filterByCategoryAndTags(req, (err, resources) => {
     res.status(err ? 400 : 200).send(err || Resource.condition(resources));
   });
 });
