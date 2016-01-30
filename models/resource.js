@@ -86,7 +86,7 @@ String.prototype.sanitize = function() {
 resourceSchema.statics.createNewResource = (newResource, userId, cb) => {
   newResource.category = (newResource.category || '').sanitize();
   if (!newResource.category) newResource.category = "general";
-  newResource.tags = newResource.tags.map(tag => tag.sanitize());
+  if (newResource.tags) newResource.tags = newResource.tags.map(tag => tag.sanitize());
   newResource.user = userId;
   Resource.create(newResource, (err, savedResource) => {
     return err ? cb(err) : cb(null, savedResource);
