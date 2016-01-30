@@ -30,9 +30,9 @@ String.prototype.escapeRegExp = function() {
   return this.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// retrieves resources within a given category that
+// filterResources: retrieves resources within a given category that
 //   - match all given tags,
-//   - have a title that contains the given query, and
+//   - have a title or tag that contains the given query, and
 //   - have not been deleted
 resourceSchema.statics.filterResources = (req, cb) => {
   let filter = (req.params.category === 'all') ? {} : { category: req.params.category };
@@ -44,8 +44,9 @@ resourceSchema.statics.filterResources = (req, cb) => {
     filter['$and'] = tags;
   }
 
-  if (req.query.title) {
-    filter.title = new RegExp(req.query.title.escapeRegExp(), 'i');
+  if (req.query.query) {
+    let re = new RegExp(req.query.query.escapeRegExp(), 'i');
+    filter['$or'] = [ { title: re }, { tags: re } ];
   }
   
   filter.timestamp = { $ne: null };
@@ -59,9 +60,9 @@ resourceSchema.statics.filterResources = (req, cb) => {
 };
 
 
-// takes an array of resources and returns an object with properties:
-//   tags: an object of all unique tags on the resources with frequency counts
-//   resources: the resources modified with a score and sorted by that score
+// condition: takes an array of resources and returns an object with properties
+//   tags - an object of all unique tags on the resources with frequency counts
+//   resources - the resources modified with a score and sorted by that score
 resourceSchema.statics.condition = (resources) => {
   let tags = resources.reduce((tags, resource) => {
     if (resource.tags) {
