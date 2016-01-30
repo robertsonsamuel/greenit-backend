@@ -35,7 +35,7 @@ String.prototype.escapeRegExp = function() {
 //   - have a title or tag that contains the given query, and
 //   - have not been deleted
 resourceSchema.statics.filterResources = (req, cb) => {
-  let filter = (req.params.category === 'all') ? {} : { category: req.params.category };
+  let filter = (req.params.category.toLowerCase() === 'all') ? {} : { category: req.params.category.toLowerCase() };
 
   if (req.query.tags) {
     let tags = req.query.tags.split(',').map(tag => {
@@ -48,7 +48,7 @@ resourceSchema.statics.filterResources = (req, cb) => {
     let re = new RegExp(req.query.query.escapeRegExp(), 'i');
     filter['$or'] = [ { title: re }, { tags: re } ];
   }
-  
+
   filter.timestamp = { $ne: null };
 
   Resource.find(filter)
