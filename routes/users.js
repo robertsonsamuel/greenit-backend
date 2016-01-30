@@ -11,9 +11,15 @@ let router = express.Router();
 
 router.get('/:userId', authMiddleware, (req, res) => {
   if (req.params.userId !== req.userId) return res.status(403).send("unauthorized");
-  User.findById(req.params.userId)
-  .exec((err, user) => {
+  User.findById(req.params.userId, (err, user) => {
     res.status(err ? 400 : 200).send(err || user);
+  })
+})
+
+router.get('/savedResources/:userId', authMiddleware, (req, res) => {
+  if (req.params.userId !== req.userId) return res.status(403).send("unauthorized");
+  User.findById(req.userId).populate('savedResources').exec((err, user) => {
+    res.status(err ? 400 : 200).send(err || user.savedResources);
   })
 })
 
