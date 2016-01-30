@@ -2,7 +2,7 @@
 
 const express        = require('express')
     , User           = require('../models/user')
-    , Resource           = require('../models/resource')
+    , Resource       = require('../models/resource')
     , authMiddleware = require('../util/auth-middleware')
     , combinedQuery  = require('../util/combinedQuery');
 
