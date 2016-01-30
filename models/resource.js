@@ -79,14 +79,14 @@ resourceSchema.statics.condition = (resources) => {
 }
 
 
-String.prototype.sanitize = function() {
+String.prototype.normalize = function() {
   return this.replace(/\W/g, '').toLowerCase();
 }
 
 resourceSchema.statics.createNewResource = (newResource, userId, cb) => {
-  newResource.category = (newResource.category || '').sanitize();
+  newResource.category = (newResource.category || '').normalize();
   if (!newResource.category) newResource.category = "general";
-  if (newResource.tags) newResource.tags = newResource.tags.map(tag => tag.sanitize());
+  if (newResource.tags) newResource.tags = newResource.tags.map(tag => tag.normalize());
   newResource.user = userId;
   Resource.create(newResource, (err, savedResource) => {
     return err ? cb(err) : cb(null, savedResource);
