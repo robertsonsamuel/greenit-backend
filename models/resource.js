@@ -103,7 +103,10 @@ resourceSchema.statics.editResource = (req, cb) => {
     foundResource.editTime = Date.now();
     foundResource.save( err => {
       if (err) return cb(err);
-      return cb(null, foundResource);
+      foundResource.populate('user', (err, user) => {
+        if (err) return cb(err);
+        return cb(null, foundResource);
+      })
     })
   })
 };
