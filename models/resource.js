@@ -26,17 +26,28 @@ let resourceSchema = mongoose.Schema({
 });
 
 
+String.prototype.escapeRegExp = function() {
+  return this.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 // retrieves resources within a given category that
-//   - match all given tags and
+//   - match all given tags,
+//   - have a title that contains the given query, and
 //   - have not been deleted
-resourceSchema.statics.filterByCategoryAndTags = (req, cb) => {
+resourceSchema.statics.filterResources = (req, cb) => {
   let filter = (req.params.category === 'all') ? {} : { category: req.params.category };
+
   if (req.query.tags) {
     let tags = req.query.tags.split(',').map(tag => {
       return { tags: tag };
     });
     filter['$and'] = tags;
   }
+
+  if (req.query.title) {
+    filter.title = new RegExp(req.query.title.escapeRegExp(), 'i');
+  }
+  
   filter.timestamp = { $ne: null };
 
   Resource.find(filter)

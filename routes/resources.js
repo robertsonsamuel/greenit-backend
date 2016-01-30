@@ -8,9 +8,9 @@ const express        = require('express')
 
 let router = express.Router();
 
-// takes a url like /resources/javascript?tags=tag1,tag2,tag3
+// takes a url like /resources/javascript?tags=tag1,tag2,tag3&title=querystring
 router.get('/:category', (req, res) => {
-  Resource.filterByCategoryAndTags(req, (err, resources) => {
+  Resource.filterResources(req, (err, resources) => {
     res.status(err ? 400 : 200).send(err || Resource.condition(resources));
   });
 });
