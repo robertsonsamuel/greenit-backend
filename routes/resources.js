@@ -22,7 +22,7 @@ router.get('/one/:id', (req, res) => {
 });
 
 router.post('/', authMiddleware, (req, res) => {
-  Resource.createNewResource(req.body, req.userId, (err, resource) => {
+  combinedQuery.createNewResource(req.body, req.userId, (err, resource) => {
     res.status(err ? 400 : 200).send(err || resource);
   });
 });

@@ -46,13 +46,13 @@ resourceSchema.statics.filterResources = (req, cb) => {
 
   if (req.query.query) {
     let re = new RegExp(req.query.query.escapeRegExp(), 'i');
-    filter['$or'] = [ { title: re }, { tags: re } ];
+    filter['$or'] = [ { title: re }, { tags: re } ]; // this can be extended to include body, if desired
   }
   
   filter.timestamp = { $ne: null };
 
   Resource.find(filter)
-  .sort({'timestamp': -1})
+  .sort({ 'timestamp': -1 })
   .lean()
   .populate({ path: 'user', select: 'username _id' }).exec((err, resources) => {
     return err ? cb(err) : cb(null, resources);
@@ -89,21 +89,6 @@ resourceSchema.statics.condition = (resources) => {
     resources: conditioned
   };
 }
-
-
-String.prototype.normalize = function() {
-  return this.replace(/\W/g, '').toLowerCase();
-}
-
-resourceSchema.statics.createNewResource = (newResource, userId, cb) => {
-  newResource.category = (newResource.category || '').normalize();
-  if (!newResource.category) newResource.category = "general";
-  if (newResource.tags) newResource.tags = newResource.tags.map(tag => tag.normalize());
-  newResource.user = userId;
-  Resource.create(newResource, (err, savedResource) => {
-    return err ? cb(err) : cb(null, savedResource);
-  });
-};
 
 
 resourceSchema.statics.editResource = (req, cb) => {

@@ -4,11 +4,29 @@ const User     = require('../models/user')
     , Resource = require('../models/resource')
     , Comment  = require('../models/comment');
 
+
+String.prototype.normalize = function() {
+  return this.replace(/\W/g, '').toLowerCase();
+}
+
 module.exports = {
 
-  saveResource: (resourceId, userId, cb) => {
+  createNewResource: (newResource, userId, cb) => {
+    newResource.category = (newResource.category || '').normalize();
+    if (!newResource.category) newResource.category = "general";
+    if (newResource.tags) newResource.tags = newResource.tags.map(tag => tag.normalize());
+    newResource.user = userId;
+    Resource.create(newResource, (err, savedResource) => {
+      err ? cb(err) : cb(null, savedResource);
 
-    // validate the existance of resource
+      User.findByIdAndUpdate(userId, { $push: { savedResources: savedResource._id } }, (err) => {
+        if (err) console.log('ERROR SAVING RESOURCE:', err);
+      });
+    });
+  },
+
+  saveResource: (resourceId, userId, cb) => {
+    // validate the existence of resource
     let findResource = new Promise((resolve, reject) => {
       Resource.findById(resourceId, (err, resource) => {
         if (err || !resource) return reject(err || "no resource found");
