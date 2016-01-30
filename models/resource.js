@@ -119,9 +119,7 @@ resourceSchema.statics.deleteResource = (req, cb) => {
   let errMsg = "error deleteing resource";
   Resource.findOne({ _id: updateId, user: userId, timestamp: { $ne: null } }, (err, foundResource) => {
     if (err || !foundResource) return cb(err || errMsg);
-    foundResource.title = '[deleted]';
-    foundResource.link = '[deleted]';
-    foundResource.body = '[deleted]';
+    foundResource.title += ' [deleted]';
     foundResource.editTime = null;
     foundResource.timestamp = null;
     foundResource.save( err => {
