@@ -18,7 +18,10 @@ router.get('/:userId', authMiddleware, (req, res) => {
 
 router.get('/savedResources/:userId', authMiddleware, (req, res) => {
   if (req.params.userId !== req.userId) return res.status(403).send("unauthorized");
-  User.findById(req.userId).populate('savedResources').exec((err, user) => {
+  User.findById(req.userId).populate({
+    path: 'savedResources',
+    populate: { path: 'user', select: 'username' }
+  }).exec((err, user) => {
     res.status(err ? 400 : 200).send(err || user.savedResources);
   })
 })
