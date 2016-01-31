@@ -17,6 +17,7 @@ module.exports = {
     if (newResource.tags) newResource.tags = newResource.tags.map(tag => tag.normalize());
     newResource.user = userId;
     Resource.create(newResource, (err, savedResource) => {
+      if (err || !savedResource) return cb(err);
       savedResource.populate({ path: 'user', select: 'username' }, (err, savedResource) => {
         err ? cb(err) : cb(null, savedResource);
       });
