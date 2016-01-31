@@ -21,6 +21,7 @@ let resourceSchema = mongoose.Schema({
   editTime: { type : Date, default: null },
   upvotes: { type: Number, default: 0 },
   downvotes: { type: Number, default: 0 },
+  commentCount: { type: Number, default: 0 },
   tags: { type: [{ type: String }], default: [] }
   // CONVENTION: categories and tags should be lowercase and contain only letters
 });

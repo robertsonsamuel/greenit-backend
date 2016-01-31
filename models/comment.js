@@ -19,6 +19,13 @@ let commentSchema = mongoose.Schema({
 });
 
 
+function changeCommentCount(resourceId, inc) {
+  Resource.finzdByIdAndUpdate(resourceId, { $inc: { commentCount: inc } }, (err) => {
+    if (err) console.log('ERROR INCREMENTING COMMENT COUNT:', err);
+  });
+};
+
+
 commentSchema.statics.createNewComment = (req, cb) => {
   let newComment = req.body
     , seed       = req.query.seed
@@ -27,18 +34,20 @@ commentSchema.statics.createNewComment = (req, cb) => {
 
   newComment.user = req.userId;
 
-  if (seed==="true") {
+  if (seed === "true") {
     newComment.root = params.parent;
     Comment.create(newComment, (err, savedComment) => {
-      return err ? cb(err) : cb(null, savedComment);
-    })
+      err ? cb(err) : cb(null, savedComment);
+      changeCommentCount(savedComment.root, 1);
+    });
   } else {
     Comment.findById(params.parent, (err, parentComment) => {
       if (err || !parentComment) return cb(err || "error creating comment");
       newComment.root = parentComment.root;
       newComment.parent = parentComment._id;
       Comment.create(newComment, (err, savedComment) => {
-        return err ? cb(err) : cb(null, savedComment);
+        err ? cb(err) : cb(null, savedComment);
+        changeCommentCount(savedComment.root, 1);
       });
     })
   }
@@ -76,7 +85,8 @@ commentSchema.statics.deleteComment = (req, cb) => {
     foundComment.save( err => {
       if (err) return cb(err);
       return cb(null, foundComment);
-    })
+    });
+    changeCommentCount(foundComment.root, -1);
   })
 };
 
