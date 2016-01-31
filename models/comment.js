@@ -20,7 +20,7 @@ let commentSchema = mongoose.Schema({
 
 
 function changeCommentCount(resourceId, inc) {
-  Resource.finzdByIdAndUpdate(resourceId, { $inc: { commentCount: inc } }, (err) => {
+  Resource.findByIdAndUpdate(resourceId, { $inc: { commentCount: inc } }, (err) => {
     if (err) console.log('ERROR INCREMENTING COMMENT COUNT:', err);
   });
 };
