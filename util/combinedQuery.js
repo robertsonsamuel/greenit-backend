@@ -17,8 +17,9 @@ module.exports = {
     if (newResource.tags) newResource.tags = newResource.tags.map(tag => tag.normalize());
     newResource.user = userId;
     Resource.create(newResource, (err, savedResource) => {
-      err ? cb(err) : cb(null, savedResource);
-
+      savedResource.populate({ path: 'user', select: 'username' }, (err, savedResource) => {
+        err ? cb(err) : cb(null, savedResource);
+      });
       User.findByIdAndUpdate(userId, { $push: { savedResources: savedResource._id } }, (err) => {
         if (err) console.log('ERROR SAVING RESOURCE:', err);
       });
