@@ -5,9 +5,6 @@ const NUM_TO_RETURN = 50; // used in the 'condition' method
 const mongoose = require('mongoose')
     , User     = require('./user');
 
-// VALID CATEGORIES
-const VALID_CATEGORIES = new Set(['general', 'javascript', 'ruby', 'html', 'css', 'python', 'go', 'swift']);
-
 let Resource;
 
 
@@ -219,11 +216,6 @@ resourceSchema.path('user').validate(function (value, respond) {
     respond( !err && !!foundUser );
   });
 }, 'Error validating resource user');
-
-resourceSchema.path('category').validate(function (value, respond) {
-  respond( VALID_CATEGORIES.has(value) );
-}, 'Error validating resource category');
-
 
 Resource = mongoose.model('Resource', resourceSchema);
 module.exports = Resource;
