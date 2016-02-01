@@ -61,7 +61,7 @@ resourceSchema.statics.filterResources = (req, cb) => {
 // condition: takes an array of resources and returns an object with properties
 //   tags - an object of all unique tags on the resources with frequency counts
 //   resources - the resources modified with a score and sorted by that score
-resourceSchema.statics.condition = (resources) => {
+resourceSchema.statics.condition = (resources, newest) => {
   let tags = resources.reduce((tags, resource) => {
     if (resource.tags) {
       resource.tags.forEach(tag => {
@@ -71,20 +71,21 @@ resourceSchema.statics.condition = (resources) => {
     return tags;
   }, {});
 
-  let conditioned = resources
-    .map((resource) => {
-      // you can adjust the score calculation here
-      resource.score = resource.upvotes - resource.downvotes;
-      return resource;
-    })
-    .sort((resourceA, resourceB) => {
+  let conditioned = resources.map((resource) => {
+    // you can adjust the score calculation here
+    resource.score = resource.upvotes - resource.downvotes;
+    return resource;
+  });
+
+  if (!newest) {
+    conditioned.sort((resourceA, resourceB) => {
       return resourceB.score - resourceA.score;
-    })
-    .slice(0, NUM_TO_RETURN);
+    });
+  }
 
   return {
     tags: tags,
-    resources: conditioned
+    resources: conditioned.slice(0, NUM_TO_RETURN)
   };
 }
 
